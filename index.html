@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recall</title>
+<title>RECALL — Memory Trainer</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e0e'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-weight='700' font-size='16' fill='%23c8f135' text-anchor='middle' letter-spacing='-1'%3ER%3C/text%3E%3Crect x='6' y='25' width='20' height='1.5' rx='0.75' fill='%23c8f135' opacity='0.4'/%3E%3C/svg%3E">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -2418,21 +2418,14 @@ function renderFlipReview(main, card, progress) {
   document.getElementById('type-answer').onkeydown = e => { if (e.key === 'Enter') flipCard(); };
 }
 
+let clozeReviewBlankIndex = 0;
+let clozeReviewAnswers = [];
+let clozeReviewCorrectCount = 0;
+
 function renderClozeReview(main, card, progress) {
-  const answers = getClozeAnswers(card.clozeText);
-  // build display with input field for first blank, rest shown as [...]
-  let display = esc(card.clozeText);
-  display = display.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-  display = display.replace(/_(.+?)_/g, '<em>$1</em>');
-  display = display.replace(/`([^`]+)`/g, '<code>$1</code>');
-  let inputInserted = false;
-  display = display.replace(/\{\{c(\d+)::(.+?)\}\}/g, (match, num, ans) => {
-    if (!inputInserted) {
-      inputInserted = true;
-      return `<input class="cloze-blank-field" id="cloze-field-0" type="text" autocomplete="off" autocorrect="off" spellcheck="false" style="min-width:${Math.max(80, ans.length * 11)}px" />`;
-    }
-    return `<span style="background:rgba(255,255,255,0.06);padding:0 4px;border-radius:2px;color:var(--text-muted)">[...]</span>`;
-  });
+  clozeReviewBlankIndex = 0;
+  clozeReviewAnswers = getClozeAnswers(card.clozeText);
+  clozeReviewCorrectCount = 0;
 
   main.innerHTML = `
     <div class="review-session">
@@ -2442,10 +2435,11 @@ function renderClozeReview(main, card, progress) {
         <button class="btn-secondary" style="font-size:12px;padding:5px 12px;" onclick="endReview()">End</button>
       </div>
       <div class="session-box" style="margin-bottom:20px;">
-        <div class="session-label">Fill in the blank</div>
-        <div class="cloze-review-display">${display}</div>
+        <div class="session-label">Fill in the blank · <span id="cloze-blank-counter">1 / ${clozeReviewAnswers.length}</span></div>
+        <div class="cloze-review-display" id="cloze-rv-display"></div>
       </div>
-      <div class="input-row">
+      <div class="input-row" id="cloze-rv-input-row">
+        <input class="recall-input" id="cloze-rv-input" type="text" placeholder="type the missing word..." autocomplete="off" autocorrect="off" spellcheck="false" />
         <button class="btn-check" id="cloze-rv-btn" onclick="checkClozeReview()">Check</button>
       </div>
       <div class="feedback-row" style="margin-top:12px;">
@@ -2458,25 +2452,85 @@ function renderClozeReview(main, card, progress) {
         <button class="rating-btn rating-easy" onclick="rateCard('easy')"><span class="rating-label">Easy</span><span class="rating-interval">${calcInterval(card,'easy')}d</span></button>
       </div>
     </div>`;
-  setTimeout(() => { const f = document.getElementById('cloze-field-0'); if (f) { f.focus(); f.onkeydown = e => { if (e.key === 'Enter') checkClozeReview(); }; } }, 50);
+
+  renderClozeStep(card);
+  setTimeout(() => {
+    const f = document.getElementById('cloze-rv-input');
+    if (f) { f.focus(); f.onkeydown = e => { if (e.key === 'Enter') checkClozeReview(); }; }
+  }, 50);
+}
+
+function renderClozeStep(card) {
+  const answers = clozeReviewAnswers;
+  const currentIdx = clozeReviewBlankIndex;
+
+  // build display: answered blanks shown in green/red, current blank highlighted, future blanks as [...]
+  let text = card.clozeText;
+  let blankNum = 0;
+  let html = esc(text);
+  html = applyInlineMarkdown(html);
+
+  // replace cloze tags with appropriate display
+  let blankCount = 0;
+  html = html.replace(/\{\{c\d+::(.+?)\}\}/g, (match, ans) => {
+    const i = blankCount++;
+    if (i < currentIdx) {
+      // already answered — show the answer colored
+      const wasCorrect = answers[i]._wasCorrect;
+      const color = wasCorrect ? 'var(--accent)' : 'var(--red)';
+      return `<span style="color:${color};border-bottom:2px solid ${color};padding:0 3px;">${esc(answers[i].answer)}</span>`;
+    } else if (i === currentIdx) {
+      // current blank — show underline placeholder
+      return `<span id="cloze-current-blank" style="display:inline-block;min-width:80px;border-bottom:2px solid var(--accent);height:1.4em;vertical-align:middle;"></span>`;
+    } else {
+      return `<span style="background:rgba(255,255,255,0.06);padding:0 4px;border-radius:2px;color:var(--text-muted)">[...]</span>`;
+    }
+  });
+
+  html = applyStructure(html);
+  const display = document.getElementById('cloze-rv-display');
+  if (display) display.innerHTML = html;
+
+  const counter = document.getElementById('cloze-blank-counter');
+  if (counter) counter.textContent = (currentIdx + 1) + ' / ' + answers.length;
 }
 
 function checkClozeReview() {
   const card = reviewQueue[reviewIndex];
-  const answers = getClozeAnswers(card.clozeText);
-  const field = document.getElementById('cloze-field-0');
-  if (!field) return;
-  const typed = field.value.trim();
-  const correct = answers[0] ? normalize(typed) === normalize(answers[0].answer) : false;
-  field.disabled = true;
-  field.style.borderBottomColor = correct ? 'var(--accent)' : 'var(--red)';
-  field.style.color = correct ? 'var(--accent)' : 'var(--red)';
+  const input = document.getElementById('cloze-rv-input');
+  if (!input) return;
+  const typed = input.value.trim();
+  const answer = clozeReviewAnswers[clozeReviewBlankIndex];
+  if (!answer) return;
+
+  const correct = normalize(typed) === normalize(answer.answer);
+  answer._wasCorrect = correct;
+  if (correct) clozeReviewCorrectCount++;
+
   const fb = document.getElementById('cloze-rv-feedback');
-  fb.textContent = correct ? '✓ correct' : '✗ answer: ' + (answers[0]?.answer || '');
+  fb.textContent = correct ? '✓ correct' : '✗ ' + answer.answer;
   fb.className = 'feedback-msg ' + (correct ? 'correct' : 'wrong');
-  document.getElementById('cloze-rv-btn').style.display = 'none';
-  const rr = document.getElementById('cloze-rating-row');
-  if (rr) rr.classList.add('visible');
+
+  clozeReviewBlankIndex++;
+
+  if (clozeReviewBlankIndex >= clozeReviewAnswers.length) {
+    // all blanks done — show rating
+    renderClozeStep(card);
+    input.style.display = 'none';
+    document.getElementById('cloze-rv-btn').style.display = 'none';
+    const rr = document.getElementById('cloze-rating-row');
+    if (rr) rr.classList.add('visible');
+    // auto-set accuracy based on how many were correct
+    const acc = Math.round(clozeReviewCorrectCount / clozeReviewAnswers.length * 100);
+    fb.textContent = acc === 100 ? '✓ all correct' : `${clozeReviewCorrectCount}/${clozeReviewAnswers.length} correct`;
+    fb.className = 'feedback-msg ' + (acc === 100 ? 'correct' : 'wrong');
+  } else {
+    // move to next blank
+    renderClozeStep(card);
+    input.value = '';
+    input.classList.remove('error');
+    setTimeout(() => input.focus(), 50);
+  }
 }
 
 function flipCard() {
@@ -2516,18 +2570,28 @@ function calcInterval(card, rating) {
 function rateCard(rating) {
   const card = reviewQueue[reviewIndex];
   reviewResults[rating]++;
-  // SM-2 update
-  const newInterval = calcInterval(card, rating);
+
   const easeAdj = { again: -0.2, hard: -0.15, good: 0, easy: 0.15 }[rating];
   card.ease = Math.max(1.3, (card.ease || 2.5) + easeAdj);
-  card.interval = newInterval;
-  card.due = Date.now() + newInterval * 86400000;
-  card.reps = (card.reps || 0) + 1;
-  // update in state
-  const idx = state.ankiCards.findIndex(c => c.id === card.id);
-  if (idx !== -1) state.ankiCards[idx] = card;
-  saveState();
-  reviewIndex++;
+
+  if (rating === 'again') {
+    // don't update interval/due yet — requeue the card 3-5 positions later in this session
+    const reinsertAt = Math.min(reviewIndex + 3 + Math.floor(Math.random() * 3), reviewQueue.length);
+    reviewQueue.splice(reviewIndex, 1);      // remove from current position
+    reviewQueue.splice(reinsertAt, 0, card); // reinsert further ahead
+    // don't increment reviewIndex — the next card is now at the same index
+  } else {
+    const newInterval = calcInterval(card, rating);
+    card.interval = newInterval;
+    card.due = Date.now() + newInterval * 86400000;
+    card.reps = (card.reps || 0) + 1;
+    const idx = state.ankiCards.findIndex(c => c.id === card.id);
+    if (idx !== -1) state.ankiCards[idx] = card;
+    saveState();
+    reviewIndex++;
+  }
+
+  document.onkeydown = null; // clear key handler before re-render
   renderReviewCard();
 }
 
