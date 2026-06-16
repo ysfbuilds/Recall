@@ -709,6 +709,108 @@
   }
   .card-action-btn:hover { border-color: var(--border-strong); color: var(--text-muted); }
   .card-action-btn.delete:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── CARDS SECTION ── */
+  .cards-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 65px); }
+  .decks-sidebar { border-right: 1px solid var(--border); padding: 24px 0; display: flex; flex-direction: column; }
+  .sidebar-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); font-family: 'Space Mono', monospace; padding: 0 20px; margin-bottom: 10px; }
+  .deck-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 20px; cursor: pointer; transition: background 0.12s; border-left: 2px solid transparent; }
+  .deck-item:hover { background: var(--bg-hover); }
+  .deck-item.active { background: var(--bg-hover); border-left-color: var(--accent); }
+  .deck-item-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+  .deck-item-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .deck-item-count { font-size: 11px; color: var(--text-faint); font-family: 'Space Mono', monospace; }
+  .deck-item-due { font-size: 10px; color: var(--red); font-family: 'Space Mono', monospace; }
+  .sidebar-add-deck { margin: 12px 20px 0; background: none; border: 1px dashed var(--border); color: var(--text-faint); font-family: 'Space Grotesk', sans-serif; font-size: 12px; padding: 7px 0; cursor: pointer; border-radius: 2px; transition: all 0.15s; width: calc(100% - 40px); }
+  .sidebar-add-deck:hover { border-color: var(--border-strong); color: var(--text-muted); }
+
+  .cards-main { padding: 32px 36px; }
+  .cards-main-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
+  .deck-title-display { font-size: 36px; font-weight: 700; text-transform: uppercase; letter-spacing: -0.01em; line-height: 1; }
+  .deck-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 6px; font-family: 'Space Mono', monospace; }
+  .cards-actions-row { display: flex; gap: 8px; align-items: center; flex-shrink: 0; margin-left: 20px; margin-top: 4px; }
+
+  .anki-card-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; transition: background 0.12s; margin-bottom: 6px; }
+  .anki-card-row:hover { background: var(--bg-hover); }
+  .anki-card-type { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Mono', monospace; padding: 3px 7px; border-radius: 2px; flex-shrink: 0; margin-top: 2px; }
+  .type-basic { background: var(--blue-dim); color: var(--blue); }
+  .type-cloze-card { background: rgba(200,241,53,0.1); color: var(--accent); }
+  .anki-card-front { font-size: 14px; font-weight: 500; flex: 1; line-height: 1.4; }
+  .anki-card-due-badge { font-size: 10px; font-family: 'Space Mono', monospace; color: var(--red); flex-shrink: 0; margin-top: 3px; }
+  .anki-card-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* rendered content */
+  .rendered b { font-weight: 600; }
+  .rendered em { font-style: italic; color: var(--text-muted); }
+  .rendered code { font-family: 'Space Mono', monospace; font-size: 12px; background: rgba(255,255,255,0.07); padding: 1px 5px; border-radius: 2px; }
+  .rendered ul { padding-left: 18px; margin: 4px 0; }
+  .rendered li { margin: 2px 0; }
+
+  /* card editor modal */
+  .card-editor-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; align-items: center; justify-content: center; }
+  .card-editor-overlay.open { display: flex; }
+  .card-editor { background: var(--bg-card); border: 1px solid var(--border-strong); width: 640px; max-width: calc(100vw - 40px); max-height: 90vh; overflow-y: auto; border-radius: 4px; padding: 28px; }
+  .editor-title { font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; }
+  .editor-type-row { display: flex; gap: 8px; margin-bottom: 20px; }
+  .editor-type-btn { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Space Mono', monospace; padding: 6px 14px; border: 1px solid var(--border); background: none; color: var(--text-muted); cursor: pointer; border-radius: 2px; transition: all 0.15s; }
+  .editor-type-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .editor-field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-family: 'Space Mono', monospace; margin-bottom: 6px; }
+  .editor-field-hint { font-size: 11px; color: var(--text-faint); margin-bottom: 8px; line-height: 1.5; }
+  .rich-toolbar { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
+  .rich-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'Space Grotesk', sans-serif; font-size: 12px; padding: 4px 10px; cursor: pointer; border-radius: 2px; transition: all 0.12s; line-height: 1.4; }
+  .rich-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .editor-textarea { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 10px 14px; border-radius: 2px; outline: none; resize: vertical; min-height: 90px; line-height: 1.6; transition: border-color 0.15s; margin-bottom: 16px; }
+  .editor-textarea:focus { border-color: var(--accent); }
+  .cloze-hint-box { background: rgba(200,241,53,0.06); border: 1px solid rgba(200,241,53,0.2); border-radius: 2px; padding: 10px 14px; font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.7; display: none; }
+  .cloze-hint-box code { font-family: 'Space Mono', monospace; color: var(--accent); }
+  .editor-preview-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); font-family: 'Space Mono', monospace; margin-bottom: 8px; margin-top: 4px; }
+  .editor-preview { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 2px; padding: 14px; font-size: 14px; line-height: 1.7; min-height: 48px; margin-bottom: 16px; color: var(--text); }
+  .editor-preview b { font-weight: 600; }
+  .editor-preview em { font-style: italic; color: var(--text-muted); }
+  .editor-preview code { font-family: 'Space Mono', monospace; font-size: 12px; background: rgba(255,255,255,0.07); padding: 2px 6px; border-radius: 2px; }
+  .editor-preview ul { padding-left: 20px; margin: 4px 0; }
+  .editor-preview li { margin: 2px 0; }
+  .cloze-blank-preview { background: rgba(200,241,53,0.15); color: var(--accent); border-bottom: 1px solid var(--accent); padding: 0 3px; }
+  .editor-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+
+  /* review */
+  .review-session { padding: 48px 36px; max-width: 680px; }
+  .review-progress-row { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .review-progress-strip { flex: 1; height: 3px; background: var(--border); border-radius: 1px; overflow: hidden; }
+  .review-progress-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 0.3s; }
+  .review-counter { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+  .flip-card-wrap { perspective: 1200px; width: 100%; margin-bottom: 20px; }
+  .flip-card { width: 100%; min-height: 200px; position: relative; transform-style: preserve-3d; transition: transform 0.45s ease; }
+  .flip-card.flipped { transform: rotateY(180deg); }
+  .flip-face { position: absolute; width: 100%; min-height: 200px; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid var(--border); border-radius: 4px; padding: 32px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: var(--bg-card); }
+  .flip-face-back { transform: rotateY(180deg); background: rgba(200,241,53,0.03); border-color: rgba(200,241,53,0.25); }
+  .flip-face-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); font-family: 'Space Mono', monospace; margin-bottom: 16px; }
+  .flip-face-content { font-size: 18px; line-height: 1.7; width: 100%; }
+  .flip-face-content ul { text-align: left; padding-left: 20px; }
+  .flip-face-content li { margin: 3px 0; }
+  .flip-btn { width: 100%; background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 13px; cursor: pointer; border-radius: 2px; transition: all 0.15s; margin-bottom: 14px; }
+  .flip-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .rating-row { display: none; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+  .rating-row.visible { display: grid; }
+  .rating-btn { padding: 10px 6px; border-radius: 2px; border: 1px solid var(--border); background: none; font-family: 'Space Grotesk', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .rating-btn:hover { background: var(--bg-hover); }
+  .rating-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .rating-interval { display: block; font-size: 10px; color: var(--text-faint); font-family: 'Space Mono', monospace; margin-top: 2px; }
+  .type-answer-row { display: flex; gap: 10px; margin-bottom: 14px; }
+  .type-answer-input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 15px; padding: 11px 14px; border-radius: 2px; outline: none; transition: border-color 0.15s; }
+  .type-answer-input:focus { border-color: var(--accent); }
+  .cloze-review-display { font-size: 18px; line-height: 2; margin-bottom: 20px; }
+  .cloze-blank-field { display: inline-block; background: rgba(255,255,255,0.05); border: none; border-bottom: 2px solid var(--accent); color: var(--accent); font-family: 'Space Grotesk', sans-serif; font-size: 17px; padding: 0 6px; min-width: 80px; outline: none; text-align: center; vertical-align: middle; }
+
+  .review-complete { padding: 60px 36px; max-width: 500px; }
+  .review-complete-title { font-size: 48px; font-weight: 700; text-transform: uppercase; letter-spacing: -0.02em; color: var(--accent); }
+  .review-complete-sub { font-size: 14px; color: var(--text-muted); margin-top: 8px; margin-bottom: 32px; }
+  .review-stats-row { display: flex; gap: 28px; margin-bottom: 32px; }
+
+  .deck-empty { padding: 60px 0; text-align: center; color: var(--text-faint); }
+  .deck-empty-title { font-size: 18px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; color: var(--text-muted); }
+  .no-deck-selected { padding: 80px 36px; color: var(--text-faint); }
+  .no-deck-title { font-size: 28px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; color: var(--text); }
 </style>
 </head>
 <body>
@@ -719,11 +821,12 @@
   <ul class="nav-links">
     <li id="nav-library" class="active" onclick="showPanel('library')">Library</li>
     <li id="nav-practice" onclick="showPanel('practice')">Practice</li>
+    <li id="nav-cards" onclick="showPanel('cards')">Cards</li>
     <li id="nav-stats" onclick="showPanel('stats')">Stats</li>
   </ul>
   <div class="nav-right">
     <div class="streak-badge" id="streak-badge">🔥 6 days</div>
-    <button class="btn-add" onclick="openModal()">+ Add text</button>
+    <button class="btn-add" id="nav-add-btn" onclick="navAddClick()">+ Add text</button>
   </div>
 </nav>
 
@@ -926,6 +1029,97 @@
     <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
       <button class="btn-secondary" onclick="backToSelect()">← Back to library</button>
       <button class="btn-secondary" onclick="resetSession()">Reset session</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARDS -->
+<div id="panel-cards" class="panel">
+  <div class="cards-layout">
+    <!-- Sidebar: deck list -->
+    <div class="decks-sidebar">
+      <div class="sidebar-section-label">Decks</div>
+      <div id="decks-list"></div>
+      <button class="sidebar-add-deck" onclick="addDeckPrompt()">+ New deck</button>
+    </div>
+    <!-- Main: deck contents or review -->
+    <div id="cards-main-area">
+      <div class="no-deck-selected">
+        <div class="no-deck-title">Select a deck</div>
+        <div style="font-size:14px;">Choose a deck from the sidebar or create one to get started.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CARD EDITOR MODAL -->
+<div class="card-editor-overlay" id="card-editor-overlay" onclick="handleCardEditorClick(event)">
+  <div class="card-editor">
+    <div class="editor-title" id="card-editor-title">New card</div>
+    <div class="editor-type-row">
+      <button class="editor-type-btn active" id="etype-basic" onclick="setCardEditorType('basic')">Basic</button>
+      <button class="editor-type-btn" id="etype-cloze" onclick="setCardEditorType('cloze')">Cloze deletion</button>
+    </div>
+
+    <!-- Basic fields -->
+    <div id="basic-fields">
+      <div class="editor-field-label">Front</div>
+      <div class="rich-toolbar">
+        <button class="rich-btn" onclick="wrapText('card-front','**','**')"><b>B</b></button>
+        <button class="rich-btn" onclick="wrapText('card-front','_','_')"><em>I</em></button>
+        <button class="rich-btn" onclick="wrapText('card-front','`','`')">code</button>
+        <button class="rich-btn" onclick="insertBullet('card-front')">• list</button>
+      </div>
+      <textarea class="editor-textarea" id="card-front" placeholder="Question or prompt..." oninput="updateCardPreview()"></textarea>
+      <div class="editor-preview-label">Preview</div>
+      <div class="editor-preview rendered" id="card-front-preview"></div>
+
+      <div class="editor-field-label">Back</div>
+      <div class="rich-toolbar">
+        <button class="rich-btn" onclick="wrapText('card-back','**','**')"><b>B</b></button>
+        <button class="rich-btn" onclick="wrapText('card-back','_','_')"><em>I</em></button>
+        <button class="rich-btn" onclick="wrapText('card-back','`','`')">code</button>
+        <button class="rich-btn" onclick="insertBullet('card-back')">• list</button>
+      </div>
+      <textarea class="editor-textarea" id="card-back" placeholder="Answer..." oninput="updateCardPreview()"></textarea>
+      <div class="editor-preview-label">Preview</div>
+      <div class="editor-preview rendered" id="card-back-preview"></div>
+    </div>
+
+    <!-- Cloze fields -->
+    <div id="cloze-fields" style="display:none;">
+      <div class="editor-field-label">Text with cloze deletions</div>
+      <div class="cloze-hint-box" id="cloze-hint-box" style="display:block;">
+        Wrap words to hide with <code>{{c1::word}}</code>. Use <code>{{c2::word}}</code> for a second blank, etc.<br>
+        Example: <code>The capital of France is {{c1::Paris}} and it has {{c2::2 million}} people.</code>
+      </div>
+      <div class="rich-toolbar">
+        <button class="rich-btn" onclick="wrapText('card-cloze','**','**')"><b>B</b></button>
+        <button class="rich-btn" onclick="wrapText('card-cloze','_','_')"><em>I</em></button>
+        <button class="rich-btn" onclick="wrapText('card-cloze','`','`')">code</button>
+        <button class="rich-btn" onclick="insertClozeTag()">+ cloze</button>
+      </div>
+      <textarea class="editor-textarea" id="card-cloze" placeholder="The capital of France is {{c1::Paris}}..." oninput="updateCardPreview()" style="min-height:120px;"></textarea>
+      <div class="editor-preview-label">Preview (blanked)</div>
+      <div class="editor-preview rendered" id="card-cloze-preview"></div>
+    </div>
+
+    <div class="editor-actions">
+      <button class="btn-cancel" onclick="closeCardEditor()">Cancel</button>
+      <button class="btn-save" onclick="saveCard()">Save card</button>
+    </div>
+  </div>
+</div>
+
+<!-- DECK NAME MODAL -->
+<div class="modal-overlay" id="deck-modal" onclick="if(event.target===this)closeDeckModal()" style="z-index:250;">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title" id="deck-modal-title">New deck</div>
+    <div class="field-label">Deck name</div>
+    <input class="text-input" id="deck-name-input" type="text" placeholder="e.g. Biology, Spanish verbs..." />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDeckModal()">Cancel</button>
+      <button class="btn-save" onclick="saveDeck()">Create deck</button>
     </div>
   </div>
 </div>
@@ -1730,6 +1924,550 @@ function renderStats() {
     </div>`;
   }).join('') || '<div style="padding:20px 0; color:var(--text-faint); font-size:14px;">No data yet</div>';
 }
+
+// ─── NAV ADD BUTTON ───────────────────────────────────────────────────────────
+function navAddClick() {
+  if (currentPanel === 'cards') openCardEditor();
+  else openModal();
+}
+
+// ─── CARDS STATE ──────────────────────────────────────────────────────────────
+// decks: [{ id, name, created }]
+// ankiCards: [{ id, deckId, type:'basic'|'cloze', front, back, clozeText, interval, due, ease, reps }]
+if (!state.decks) state.decks = [];
+if (!state.ankiCards) state.ankiCards = [];
+
+// seed demo deck
+if (state.decks.length === 0) {
+  const deckId = 'deck_demo';
+  state.decks.push({ id: deckId, name: 'Computer Science', created: Date.now() });
+  state.ankiCards.push(
+    { id: 'ac1', deckId, type: 'basic', front: 'What is **Big O notation**?', back: 'A way to describe algorithm _efficiency_ — how runtime or space grows as input size increases.\n- O(1): constant\n- O(n): linear\n- O(n²): quadratic', interval: 1, due: Date.now() - 86400000, ease: 2.5, reps: 2 },
+    { id: 'ac2', deckId, type: 'basic', front: 'What does `git rebase` do?', back: 'Moves or combines commits onto a new base commit. Rewrites history — cleaner than merge for feature branches.', interval: 3, due: Date.now() + 86400000, ease: 2.5, reps: 4 },
+    { id: 'ac3', deckId, type: 'cloze', clozeText: 'A {{c1::hash table}} uses a {{c2::hash function}} to map keys to array indices, giving O({{c3::1}}) average lookup time.', interval: 1, due: Date.now() - 86400000, ease: 2.5, reps: 1 }
+  );
+  saveState();
+}
+
+let activeDeckId = null;
+let cardEditorType = 'basic';
+let editingCardId = null;
+let clozeCounter = 1;
+
+// review state
+let reviewQueue = [];
+let reviewIndex = 0;
+let reviewFlipped = false;
+let reviewMode = 'flip'; // 'flip' | 'type'
+let reviewResults = { again: 0, hard: 0, good: 0, easy: 0 };
+
+// ─── PANEL ROUTING UPDATE ─────────────────────────────────────────────────────
+const _origShowPanel = showPanel;
+// redefine showPanel to handle cards tab
+showPanel = function(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  ['library','practice','cards','stats'].forEach(n => {
+    const el = document.getElementById('nav-' + n);
+    if (el) el.classList.toggle('active', n === name);
+  });
+  document.getElementById('panel-' + name).classList.add('active');
+  currentPanel = name;
+  const addBtn = document.getElementById('nav-add-btn');
+  if (name === 'cards') {
+    addBtn.textContent = '+ Add card';
+    renderDecks();
+  } else {
+    addBtn.textContent = '+ Add text';
+    if (name === 'library') renderLibrary();
+    if (name === 'practice') renderPracticeSelect();
+    if (name === 'stats') renderStats();
+  }
+};
+
+// ─── MARKDOWN-LITE RENDERER ───────────────────────────────────────────────────
+function renderMd(text) {
+  if (!text) return '';
+  let html = esc(text);
+  // bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  // italic
+  html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+  // code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // bullets: lines starting with - or *
+  html = html.replace(/((?:^|\n)[•\-\*] .+)+/g, m => {
+    const items = m.trim().split('\n').map(l => '<li>' + l.replace(/^[•\-\*] /, '') + '</li>').join('');
+    return '<ul>' + items + '</ul>';
+  });
+  // newlines
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+
+function renderClozeBlanked(text) {
+  if (!text) return '';
+  let html = esc(text);
+  html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // replace cloze tags with blanks
+  html = html.replace(/\{\{c\d+::(.+?)\}\}/g, '<span class="cloze-blank-preview">[...]</span>');
+  return html;
+}
+
+function renderClozeRevealed(text) {
+  if (!text) return '';
+  let html = esc(text);
+  html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/\{\{c\d+::(.+?)\}\}/g, '<b style="color:var(--accent)">$1</b>');
+  return html;
+}
+
+function getClozeAnswers(text) {
+  const matches = [];
+  const re = /\{\{c(\d+)::(.+?)\}\}/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    matches.push({ index: parseInt(m[1]), answer: m[2], full: m[0] });
+  }
+  return matches;
+}
+
+// ─── DECKS ────────────────────────────────────────────────────────────────────
+function renderDecks() {
+  const list = document.getElementById('decks-list');
+  if (!list) return;
+  list.innerHTML = state.decks.map(deck => {
+    const cards = state.ankiCards.filter(c => c.deckId === deck.id);
+    const due = cards.filter(c => c.due <= Date.now()).length;
+    return `<div class="deck-item${activeDeckId === deck.id ? ' active' : ''}" onclick="selectDeck('${deck.id}')">
+      <div class="deck-item-name">${esc(deck.name)}</div>
+      <div class="deck-item-right">
+        ${due > 0 ? `<span class="deck-item-due">${due}</span>` : ''}
+        <span class="deck-item-count">${cards.length}</span>
+      </div>
+    </div>`;
+  }).join('');
+  if (activeDeckId) renderDeckMain(activeDeckId);
+}
+
+function selectDeck(id) {
+  activeDeckId = id;
+  renderDecks();
+  renderDeckMain(id);
+}
+
+function renderDeckMain(deckId) {
+  const deck = state.decks.find(d => d.id === deckId);
+  if (!deck) return;
+  const cards = state.ankiCards.filter(c => c.deckId === deckId);
+  const due = cards.filter(c => c.due <= Date.now()).length;
+  const main = document.getElementById('cards-main-area');
+
+  main.innerHTML = `
+    <div class="cards-main">
+      <div class="cards-main-header">
+        <div>
+          <div class="deck-title-display">${esc(deck.name)}</div>
+          <div class="deck-subtitle">${cards.length} card${cards.length !== 1 ? 's' : ''} · ${due} due</div>
+        </div>
+        <div class="cards-actions-row">
+          ${due > 0 ? `<button class="btn-add" onclick="startReview('${deckId}','flip')">Review ${due} due</button>` : ''}
+          <button class="btn-secondary" onclick="openCardEditor()">+ Card</button>
+          <button class="btn-secondary" onclick="deleteDeck('${deckId}')">Delete deck</button>
+        </div>
+      </div>
+      ${cards.length === 0 ? `
+        <div class="deck-empty">
+          <div class="deck-empty-title">No cards yet</div>
+          <div class="deck-empty-sub">Add your first card to start practising.</div>
+        </div>` : `
+        <div id="deck-card-list">
+          ${cards.map(c => cardRow(c)).join('')}
+        </div>`}
+    </div>`;
+}
+
+function cardRow(c) {
+  const isDue = c.due <= Date.now();
+  const frontText = c.type === 'cloze'
+    ? c.clozeText.replace(/\{\{c\d+::(.+?)\}\}/g, '[...]')
+    : c.front;
+  return `<div class="anki-card-row" onclick="openCardEditor('${c.id}')">
+    <span class="anki-card-type ${c.type === 'cloze' ? 'type-cloze-card' : 'type-basic'}">${c.type}</span>
+    <div class="anki-card-front rendered">${renderMd(frontText.slice(0, 120))}</div>
+    ${isDue ? '<span class="anki-card-due-badge">due</span>' : ''}
+    <div class="anki-card-row-actions" onclick="event.stopPropagation()">
+      <button class="card-action-btn delete" data-card-delete="${c.id}" onclick="deleteCard('${c.id}')">Delete</button>
+    </div>
+  </div>`;
+}
+
+function addDeckPrompt() {
+  document.getElementById('deck-name-input').value = '';
+  document.getElementById('deck-modal').classList.add('open');
+  document.getElementById('deck-name-input').focus();
+  document.getElementById('deck-name-input').onkeydown = e => { if (e.key === 'Enter') saveDeck(); };
+}
+function closeDeckModal() { document.getElementById('deck-modal').classList.remove('open'); }
+
+function saveDeck() {
+  const name = document.getElementById('deck-name-input').value.trim();
+  if (!name) return;
+  const deck = { id: 'deck_' + Date.now(), name, created: Date.now() };
+  state.decks.push(deck);
+  saveState();
+  closeDeckModal();
+  activeDeckId = deck.id;
+  renderDecks();
+}
+
+function deleteDeck(id) {
+  state.decks = state.decks.filter(d => d.id !== id);
+  state.ankiCards = state.ankiCards.filter(c => c.deckId !== id);
+  if (activeDeckId === id) activeDeckId = null;
+  saveState();
+  renderDecks();
+  document.getElementById('cards-main-area').innerHTML = '<div class="no-deck-selected"><div class="no-deck-title">Deck deleted</div></div>';
+}
+
+function deleteCard(id) {
+  const btn = document.querySelector(`[data-card-delete="${id}"]`);
+  if (!btn) return;
+  btn.textContent = 'Confirm?';
+  btn.style.color = 'var(--red)';
+  btn.style.borderColor = 'var(--red)';
+  btn.onclick = e => {
+    e.stopPropagation();
+    state.ankiCards = state.ankiCards.filter(c => c.id !== id);
+    saveState();
+    renderDeckMain(activeDeckId);
+    renderDecks();
+  };
+  setTimeout(() => { if (activeDeckId) renderDeckMain(activeDeckId); }, 3000);
+}
+
+// ─── CARD EDITOR ──────────────────────────────────────────────────────────────
+function openCardEditor(cardId) {
+  editingCardId = cardId || null;
+  clozeCounter = 1;
+  if (cardId) {
+    const c = state.ankiCards.find(x => x.id === cardId);
+    document.getElementById('card-editor-title').textContent = 'Edit card';
+    setCardEditorType(c.type);
+    if (c.type === 'basic') {
+      document.getElementById('card-front').value = c.front || '';
+      document.getElementById('card-back').value = c.back || '';
+    } else {
+      document.getElementById('card-cloze').value = c.clozeText || '';
+    }
+  } else {
+    document.getElementById('card-editor-title').textContent = 'New card';
+    setCardEditorType('basic');
+    document.getElementById('card-front').value = '';
+    document.getElementById('card-back').value = '';
+    document.getElementById('card-cloze').value = '';
+  }
+  updateCardPreview();
+  document.getElementById('card-editor-overlay').classList.add('open');
+}
+
+function closeCardEditor() {
+  document.getElementById('card-editor-overlay').classList.remove('open');
+  editingCardId = null;
+}
+function handleCardEditorClick(e) { if (e.target === e.currentTarget) closeCardEditor(); }
+
+function setCardEditorType(type) {
+  cardEditorType = type;
+  document.getElementById('etype-basic').classList.toggle('active', type === 'basic');
+  document.getElementById('etype-cloze').classList.toggle('active', type === 'cloze');
+  document.getElementById('basic-fields').style.display = type === 'basic' ? 'block' : 'none';
+  document.getElementById('cloze-fields').style.display = type === 'cloze' ? 'block' : 'none';
+  updateCardPreview();
+}
+
+function updateCardPreview() {
+  if (cardEditorType === 'basic') {
+    document.getElementById('card-front-preview').innerHTML = renderMd(document.getElementById('card-front').value);
+    document.getElementById('card-back-preview').innerHTML = renderMd(document.getElementById('card-back').value);
+  } else {
+    document.getElementById('card-cloze-preview').innerHTML = renderClozeBlanked(document.getElementById('card-cloze').value);
+  }
+}
+
+function wrapText(id, before, after) {
+  const el = document.getElementById(id);
+  const start = el.selectionStart, end = el.selectionEnd;
+  const sel = el.value.slice(start, end) || 'text';
+  el.value = el.value.slice(0, start) + before + sel + after + el.value.slice(end);
+  el.focus();
+  el.selectionStart = start + before.length;
+  el.selectionEnd = start + before.length + sel.length;
+  updateCardPreview();
+}
+
+function insertBullet(id) {
+  const el = document.getElementById(id);
+  const pos = el.selectionStart;
+  const before = el.value.slice(0, pos);
+  const after = el.value.slice(pos);
+  const prefix = before.length === 0 || before.endsWith('\n') ? '' : '\n';
+  el.value = before + prefix + '- ' + after;
+  el.focus();
+  el.selectionStart = el.selectionEnd = pos + prefix.length + 2;
+  updateCardPreview();
+}
+
+function insertClozeTag() {
+  const el = document.getElementById('card-cloze');
+  const start = el.selectionStart, end = el.selectionEnd;
+  const sel = el.value.slice(start, end) || 'answer';
+  const tag = `{{c${clozeCounter}::${sel}}}`;
+  clozeCounter++;
+  el.value = el.value.slice(0, start) + tag + el.value.slice(end);
+  el.focus();
+  updateCardPreview();
+}
+
+function saveCard() {
+  if (!activeDeckId) { closeCardEditor(); return; }
+  if (cardEditorType === 'basic') {
+    const front = document.getElementById('card-front').value.trim();
+    const back = document.getElementById('card-back').value.trim();
+    if (!front || !back) {
+      if (!front) document.getElementById('card-front').style.borderColor = 'var(--red)';
+      if (!back) document.getElementById('card-back').style.borderColor = 'var(--red)';
+      return;
+    }
+    document.getElementById('card-front').style.borderColor = '';
+    document.getElementById('card-back').style.borderColor = '';
+    if (editingCardId) {
+      const c = state.ankiCards.find(x => x.id === editingCardId);
+      if (c) { c.front = front; c.back = back; c.type = 'basic'; }
+    } else {
+      state.ankiCards.push({ id: 'ac_' + Date.now(), deckId: activeDeckId, type: 'basic', front, back, interval: 1, due: Date.now(), ease: 2.5, reps: 0 });
+    }
+  } else {
+    const clozeText = document.getElementById('card-cloze').value.trim();
+    if (!clozeText || !clozeText.includes('{{c')) {
+      document.getElementById('card-cloze').style.borderColor = 'var(--red)';
+      return;
+    }
+    document.getElementById('card-cloze').style.borderColor = '';
+    if (editingCardId) {
+      const c = state.ankiCards.find(x => x.id === editingCardId);
+      if (c) { c.clozeText = clozeText; c.type = 'cloze'; }
+    } else {
+      state.ankiCards.push({ id: 'ac_' + Date.now(), deckId: activeDeckId, type: 'cloze', clozeText, interval: 1, due: Date.now(), ease: 2.5, reps: 0 });
+    }
+  }
+  saveState();
+  closeCardEditor();
+  renderDeckMain(activeDeckId);
+  renderDecks();
+}
+
+// ─── REVIEW SESSION ───────────────────────────────────────────────────────────
+function startReview(deckId, mode) {
+  activeDeckId = deckId;
+  reviewMode = mode;
+  reviewQueue = state.ankiCards.filter(c => c.deckId === deckId && c.due <= Date.now());
+  // shuffle
+  for (let i = reviewQueue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [reviewQueue[i], reviewQueue[j]] = [reviewQueue[j], reviewQueue[i]];
+  }
+  reviewIndex = 0;
+  reviewFlipped = false;
+  reviewResults = { again: 0, hard: 0, good: 0, easy: 0 };
+  renderReviewCard();
+}
+
+function renderReviewCard() {
+  const main = document.getElementById('cards-main-area');
+  if (reviewIndex >= reviewQueue.length) {
+    renderReviewComplete(main);
+    return;
+  }
+  const card = reviewQueue[reviewIndex];
+  const progress = Math.round(reviewIndex / reviewQueue.length * 100);
+
+  if (card.type === 'cloze') {
+    renderClozeReview(main, card, progress);
+  } else {
+    renderFlipReview(main, card, progress);
+  }
+}
+
+function renderFlipReview(main, card, progress) {
+  reviewFlipped = false;
+  main.innerHTML = `
+    <div class="review-session">
+      <div class="review-progress-row">
+        <div class="review-progress-strip"><div class="review-progress-fill" id="rv-progress" style="width:${progress}%"></div></div>
+        <span class="review-counter">${reviewIndex + 1} / ${reviewQueue.length}</span>
+        <button class="btn-secondary" style="font-size:12px;padding:5px 12px;" onclick="endReview()">End</button>
+      </div>
+      <div class="flip-card-wrap">
+        <div class="flip-card" id="flip-card">
+          <div class="flip-face">
+            <div class="flip-face-label">Front</div>
+            <div class="flip-face-content rendered">${renderMd(card.front)}</div>
+          </div>
+          <div class="flip-face flip-face-back">
+            <div class="flip-face-label">Back</div>
+            <div class="flip-face-content rendered">${renderMd(card.back)}</div>
+          </div>
+        </div>
+      </div>
+      <button class="flip-btn" id="flip-btn" onclick="flipCard()">Flip card</button>
+
+      <div class="type-answer-row" id="type-row">
+        <input class="type-answer-input" id="type-answer" placeholder="Type your answer, then flip..." autocomplete="off" autocorrect="off" spellcheck="false" />
+      </div>
+
+      <div class="rating-row" id="rating-row">
+        <button class="rating-btn rating-again" onclick="rateCard('again')">
+          <span class="rating-label">Again</span>
+          <span class="rating-interval">&lt;1d</span>
+        </button>
+        <button class="rating-btn rating-hard" onclick="rateCard('hard')">
+          <span class="rating-label">Hard</span>
+          <span class="rating-interval">${calcInterval(reviewQueue[reviewIndex],'hard')}d</span>
+        </button>
+        <button class="rating-btn rating-good" onclick="rateCard('good')">
+          <span class="rating-label">Good</span>
+          <span class="rating-interval">${calcInterval(reviewQueue[reviewIndex],'good')}d</span>
+        </button>
+        <button class="rating-btn rating-easy" onclick="rateCard('easy')">
+          <span class="rating-label">Easy</span>
+          <span class="rating-interval">${calcInterval(reviewQueue[reviewIndex],'easy')}d</span>
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderClozeReview(main, card, progress) {
+  const answers = getClozeAnswers(card.clozeText);
+  // build display with input field for first blank, rest shown as [...]
+  let display = esc(card.clozeText);
+  display = display.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  display = display.replace(/_(.+?)_/g, '<em>$1</em>');
+  display = display.replace(/`([^`]+)`/g, '<code>$1</code>');
+  let inputInserted = false;
+  display = display.replace(/\{\{c(\d+)::(.+?)\}\}/g, (match, num, ans) => {
+    if (!inputInserted) {
+      inputInserted = true;
+      return `<input class="cloze-blank-field" id="cloze-field-0" type="text" autocomplete="off" autocorrect="off" spellcheck="false" style="min-width:${Math.max(80, ans.length * 11)}px" />`;
+    }
+    return `<span style="background:rgba(255,255,255,0.06);padding:0 4px;border-radius:2px;color:var(--text-muted)">[...]</span>`;
+  });
+
+  main.innerHTML = `
+    <div class="review-session">
+      <div class="review-progress-row">
+        <div class="review-progress-strip"><div class="review-progress-fill" style="width:${progress}%"></div></div>
+        <span class="review-counter">${reviewIndex + 1} / ${reviewQueue.length}</span>
+        <button class="btn-secondary" style="font-size:12px;padding:5px 12px;" onclick="endReview()">End</button>
+      </div>
+      <div class="session-box" style="margin-bottom:20px;">
+        <div class="session-label">Fill in the blank</div>
+        <div class="cloze-review-display">${display}</div>
+      </div>
+      <div class="input-row">
+        <button class="btn-check" id="cloze-rv-btn" onclick="checkClozeReview()">Check</button>
+      </div>
+      <div class="feedback-row" style="margin-top:12px;">
+        <span class="feedback-msg" id="cloze-rv-feedback"></span>
+      </div>
+      <div class="rating-row" id="cloze-rating-row">
+        <button class="rating-btn rating-again" onclick="rateCard('again')"><span class="rating-label">Again</span><span class="rating-interval">&lt;1d</span></button>
+        <button class="rating-btn rating-hard" onclick="rateCard('hard')"><span class="rating-label">Hard</span><span class="rating-interval">${calcInterval(card,'hard')}d</span></button>
+        <button class="rating-btn rating-good" onclick="rateCard('good')"><span class="rating-label">Good</span><span class="rating-interval">${calcInterval(card,'good')}d</span></button>
+        <button class="rating-btn rating-easy" onclick="rateCard('easy')"><span class="rating-label">Easy</span><span class="rating-interval">${calcInterval(card,'easy')}d</span></button>
+      </div>
+    </div>`;
+  setTimeout(() => { const f = document.getElementById('cloze-field-0'); if (f) { f.focus(); f.onkeydown = e => { if (e.key === 'Enter') checkClozeReview(); }; } }, 50);
+}
+
+function checkClozeReview() {
+  const card = reviewQueue[reviewIndex];
+  const answers = getClozeAnswers(card.clozeText);
+  const field = document.getElementById('cloze-field-0');
+  if (!field) return;
+  const typed = field.value.trim();
+  const correct = answers[0] ? normalize(typed) === normalize(answers[0].answer) : false;
+  field.disabled = true;
+  field.style.borderBottomColor = correct ? 'var(--accent)' : 'var(--red)';
+  field.style.color = correct ? 'var(--accent)' : 'var(--red)';
+  const fb = document.getElementById('cloze-rv-feedback');
+  fb.textContent = correct ? '✓ correct' : '✗ answer: ' + (answers[0]?.answer || '');
+  fb.className = 'feedback-msg ' + (correct ? 'correct' : 'wrong');
+  document.getElementById('cloze-rv-btn').style.display = 'none';
+  const rr = document.getElementById('cloze-rating-row');
+  if (rr) rr.classList.add('visible');
+}
+
+function flipCard() {
+  reviewFlipped = !reviewFlipped;
+  const fc = document.getElementById('flip-card');
+  if (fc) fc.classList.toggle('flipped', reviewFlipped);
+  const flipBtn = document.getElementById('flip-btn');
+  if (flipBtn) flipBtn.style.display = 'none';
+  const rr = document.getElementById('rating-row');
+  if (rr) rr.classList.add('visible');
+}
+
+function calcInterval(card, rating) {
+  const ease = card.ease || 2.5;
+  const interval = card.interval || 1;
+  if (rating === 'again') return 1;
+  if (rating === 'hard') return Math.max(1, Math.round(interval * 1.2));
+  if (rating === 'good') return Math.round(interval * ease);
+  if (rating === 'easy') return Math.round(interval * ease * 1.3);
+  return 1;
+}
+
+function rateCard(rating) {
+  const card = reviewQueue[reviewIndex];
+  reviewResults[rating]++;
+  // SM-2 update
+  const newInterval = calcInterval(card, rating);
+  const easeAdj = { again: -0.2, hard: -0.15, good: 0, easy: 0.15 }[rating];
+  card.ease = Math.max(1.3, (card.ease || 2.5) + easeAdj);
+  card.interval = newInterval;
+  card.due = Date.now() + newInterval * 86400000;
+  card.reps = (card.reps || 0) + 1;
+  // update in state
+  const idx = state.ankiCards.findIndex(c => c.id === card.id);
+  if (idx !== -1) state.ankiCards[idx] = card;
+  saveState();
+  reviewIndex++;
+  renderReviewCard();
+}
+
+function renderReviewComplete(main) {
+  const total = reviewQueue.length;
+  const good = reviewResults.good + reviewResults.easy;
+  const acc = total > 0 ? Math.round(good / total * 100) : 0;
+  main.innerHTML = `
+    <div class="review-complete">
+      <div class="review-complete-title">Done</div>
+      <div class="review-complete-sub">${total} card${total !== 1 ? 's' : ''} reviewed</div>
+      <div class="review-stats-row">
+        <div><div class="hero-stat-num good">${acc}%</div><div class="hero-stat-label">Recall rate</div></div>
+        <div><div class="hero-stat-num" style="color:var(--red)">${reviewResults.again}</div><div class="hero-stat-label">Again</div></div>
+        <div><div class="hero-stat-num" style="color:#EF9F27">${reviewResults.hard}</div><div class="hero-stat-label">Hard</div></div>
+        <div><div class="hero-stat-num good">${reviewResults.good + reviewResults.easy}</div><div class="hero-stat-label">Good/easy</div></div>
+      </div>
+      <button class="btn-add" onclick="renderDeckMain('${activeDeckId}')">Back to deck</button>
+    </div>`;
+}
+
+function endReview() { if (activeDeckId) renderDeckMain(activeDeckId); }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 renderLibrary();
