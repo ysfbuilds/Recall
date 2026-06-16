@@ -774,20 +774,29 @@
   .editor-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
 
   /* review */
-  .review-session { padding: 48px 36px; max-width: 680px; }
+  .review-session { padding: 40px 36px; max-width: 860px; }
   .review-progress-row { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
   .review-progress-strip { flex: 1; height: 3px; background: var(--border); border-radius: 1px; overflow: hidden; }
   .review-progress-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 0.3s; }
   .review-counter { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
-  .flip-card-wrap { perspective: 1200px; width: 100%; margin-bottom: 20px; }
-  .flip-card { width: 100%; min-height: 200px; position: relative; transform-style: preserve-3d; transition: transform 0.45s ease; }
-  .flip-card.flipped { transform: rotateY(180deg); }
-  .flip-face { position: absolute; width: 100%; min-height: 200px; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid var(--border); border-radius: 4px; padding: 32px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: var(--bg-card); }
-  .flip-face-back { transform: rotateY(180deg); background: rgba(200,241,53,0.03); border-color: rgba(200,241,53,0.25); }
-  .flip-face-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); font-family: 'Space Mono', monospace; margin-bottom: 16px; }
-  .flip-face-content { font-size: 18px; line-height: 1.7; width: 100%; }
+
+  /* flip card — no absolute positioning so card height tracks content */
+  .flip-card-wrap { width: 100%; margin-bottom: 16px; }
+  .flip-card-front, .flip-card-back {
+    width: 100%; border: 1px solid var(--border); border-radius: 4px;
+    padding: 28px 32px; background: var(--bg-card);
+    display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+  }
+  .flip-card-back { background: rgba(200,241,53,0.03); border-color: rgba(200,241,53,0.25); display: none; }
+  .flip-card-back.visible { display: flex; }
+  .flip-face-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); font-family: 'Space Mono', monospace; margin-bottom: 14px; }
+  .flip-face-content { font-size: 17px; line-height: 1.75; width: 100%; }
   .flip-face-content ul { text-align: left; padding-left: 20px; }
-  .flip-face-content li { margin: 3px 0; }
+  .flip-face-content li { margin: 4px 0; }
+  .flip-face-content b { font-weight: 600; }
+  .flip-face-content em { font-style: italic; color: var(--text-muted); }
+  .flip-face-content code { font-family: 'Space Mono', monospace; font-size: 13px; background: rgba(255,255,255,0.07); padding: 2px 6px; border-radius: 2px; }
+
   .flip-btn { width: 100%; background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 13px; cursor: pointer; border-radius: 2px; transition: all 0.15s; margin-bottom: 14px; }
   .flip-btn:hover { border-color: var(--border-strong); color: var(--text); }
   .rating-row { display: none; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
@@ -1065,23 +1074,23 @@
     <div id="basic-fields">
       <div class="editor-field-label">Front</div>
       <div class="rich-toolbar">
-        <button class="rich-btn" onclick="wrapText('card-front','**','**')"><b>B</b></button>
-        <button class="rich-btn" onclick="wrapText('card-front','_','_')"><em>I</em></button>
-        <button class="rich-btn" onclick="wrapText('card-front','`','`')">code</button>
-        <button class="rich-btn" onclick="insertBullet('card-front')">• list</button>
+        <button class="rich-btn" onclick="wrapText('card-front','**','**')" title="Cmd/Ctrl+B"><b>B</b></button>
+        <button class="rich-btn" onclick="wrapText('card-front','_','_')" title="Cmd/Ctrl+I"><em>I</em></button>
+        <button class="rich-btn" onclick="wrapText('card-front','`','`')" title="Cmd/Ctrl+E">code</button>
+        <button class="rich-btn" onclick="insertBullet('card-front')" title="Select lines then click">• list</button>
       </div>
-      <textarea class="editor-textarea" id="card-front" placeholder="Question or prompt..." oninput="updateCardPreview()"></textarea>
+      <textarea class="editor-textarea" id="card-front" placeholder="Question or prompt..." oninput="updateCardPreview()" onkeydown="editorKeydown(event,'card-front')"></textarea>
       <div class="editor-preview-label">Preview</div>
       <div class="editor-preview rendered" id="card-front-preview"></div>
 
       <div class="editor-field-label">Back</div>
       <div class="rich-toolbar">
-        <button class="rich-btn" onclick="wrapText('card-back','**','**')"><b>B</b></button>
-        <button class="rich-btn" onclick="wrapText('card-back','_','_')"><em>I</em></button>
-        <button class="rich-btn" onclick="wrapText('card-back','`','`')">code</button>
-        <button class="rich-btn" onclick="insertBullet('card-back')">• list</button>
+        <button class="rich-btn" onclick="wrapText('card-back','**','**')" title="Cmd/Ctrl+B"><b>B</b></button>
+        <button class="rich-btn" onclick="wrapText('card-back','_','_')" title="Cmd/Ctrl+I"><em>I</em></button>
+        <button class="rich-btn" onclick="wrapText('card-back','`','`')" title="Cmd/Ctrl+E">code</button>
+        <button class="rich-btn" onclick="insertBullet('card-back')" title="Select lines then click">• list</button>
       </div>
-      <textarea class="editor-textarea" id="card-back" placeholder="Answer..." oninput="updateCardPreview()"></textarea>
+      <textarea class="editor-textarea" id="card-back" placeholder="Answer..." oninput="updateCardPreview()" onkeydown="editorKeydown(event,'card-back')"></textarea>
       <div class="editor-preview-label">Preview</div>
       <div class="editor-preview rendered" id="card-back-preview"></div>
     </div>
@@ -1099,7 +1108,7 @@
         <button class="rich-btn" onclick="wrapText('card-cloze','`','`')">code</button>
         <button class="rich-btn" onclick="insertClozeTag()">+ cloze</button>
       </div>
-      <textarea class="editor-textarea" id="card-cloze" placeholder="The capital of France is {{c1::Paris}}..." oninput="updateCardPreview()" style="min-height:120px;"></textarea>
+      <textarea class="editor-textarea" id="card-cloze" placeholder="The capital of France is {{c1::Paris}}..." oninput="updateCardPreview()" onkeydown="editorKeydown(event,'card-cloze')" style="min-height:120px;"></textarea>
       <div class="editor-preview-label">Preview (blanked)</div>
       <div class="editor-preview rendered" id="card-cloze-preview"></div>
     </div>
@@ -2211,14 +2220,40 @@ function wrapText(id, before, after) {
 
 function insertBullet(id) {
   const el = document.getElementById(id);
-  const pos = el.selectionStart;
-  const before = el.value.slice(0, pos);
-  const after = el.value.slice(pos);
-  const prefix = before.length === 0 || before.endsWith('\n') ? '' : '\n';
-  el.value = before + prefix + '- ' + after;
+  const start = el.selectionStart, end = el.selectionEnd;
+  const selected = el.value.slice(start, end);
+
+  if (selected.includes('\n')) {
+    // multi-line selection: bullet each line
+    const lines = selected.split('\n');
+    const bulleted = lines.map(l => l.trim().length === 0 ? l : (l.startsWith('- ') ? l : '- ' + l)).join('\n');
+    el.value = el.value.slice(0, start) + bulleted + el.value.slice(end);
+    el.selectionStart = start;
+    el.selectionEnd = start + bulleted.length;
+  } else if (selected.length > 0) {
+    const prefix = start === 0 || el.value[start - 1] === '\n' ? '' : '\n';
+    const replacement = prefix + '- ' + selected;
+    el.value = el.value.slice(0, start) + replacement + el.value.slice(end);
+    el.selectionStart = start + prefix.length;
+    el.selectionEnd = start + prefix.length + 2 + selected.length;
+  } else {
+    const before = el.value.slice(0, start);
+    const after = el.value.slice(start);
+    const prefix = before.length === 0 || before.endsWith('\n') ? '' : '\n';
+    el.value = before + prefix + '- ' + after;
+    el.selectionStart = el.selectionEnd = start + prefix.length + 2;
+  }
   el.focus();
-  el.selectionStart = el.selectionEnd = pos + prefix.length + 2;
   updateCardPreview();
+}
+
+function editorKeydown(e, fieldId) {
+  const isMac = navigator.platform.toUpperCase().includes('MAC');
+  const mod = isMac ? e.metaKey : e.ctrlKey;
+  if (mod && e.key === 'b') { e.preventDefault(); wrapText(fieldId, '**', '**'); }
+  if (mod && e.key === 'i') { e.preventDefault(); wrapText(fieldId, '_', '_'); }
+  if (mod && e.key === 'e') { e.preventDefault(); wrapText(fieldId, '`', '`'); }
+}
 }
 
 function insertClozeTag() {
@@ -2311,23 +2346,23 @@ function renderFlipReview(main, card, progress) {
         <span class="review-counter">${reviewIndex + 1} / ${reviewQueue.length}</span>
         <button class="btn-secondary" style="font-size:12px;padding:5px 12px;" onclick="endReview()">End</button>
       </div>
+
       <div class="flip-card-wrap">
-        <div class="flip-card" id="flip-card">
-          <div class="flip-face">
-            <div class="flip-face-label">Front</div>
-            <div class="flip-face-content rendered">${renderMd(card.front)}</div>
-          </div>
-          <div class="flip-face flip-face-back">
-            <div class="flip-face-label">Back</div>
-            <div class="flip-face-content rendered">${renderMd(card.back)}</div>
-          </div>
+        <div class="flip-card-front" id="flip-front">
+          <div class="flip-face-label">Front</div>
+          <div class="flip-face-content rendered">${renderMd(card.front)}</div>
+        </div>
+        <div class="flip-card-back" id="flip-back">
+          <div class="flip-face-label">Back</div>
+          <div class="flip-face-content rendered">${renderMd(card.back)}</div>
         </div>
       </div>
-      <button class="flip-btn" id="flip-btn" onclick="flipCard()">Flip card</button>
 
       <div class="type-answer-row" id="type-row">
-        <input class="type-answer-input" id="type-answer" placeholder="Type your answer, then flip..." autocomplete="off" autocorrect="off" spellcheck="false" />
+        <input class="type-answer-input" id="type-answer" placeholder="Optional: type your answer before flipping..." autocomplete="off" autocorrect="off" spellcheck="false" />
       </div>
+
+      <button class="flip-btn" id="flip-btn" onclick="flipCard()">Flip card  ·  Space</button>
 
       <div class="rating-row" id="rating-row">
         <button class="rating-btn rating-again" onclick="rateCard('again')">
@@ -2348,6 +2383,10 @@ function renderFlipReview(main, card, progress) {
         </button>
       </div>
     </div>`;
+
+  // Space to flip, 1-4 to rate
+  document.onkeydown = reviewKeyHandler;
+  document.getElementById('type-answer').onkeydown = e => { if (e.key === 'Enter') flipCard(); };
 }
 
 function renderClozeReview(main, card, progress) {
@@ -2412,13 +2451,27 @@ function checkClozeReview() {
 }
 
 function flipCard() {
-  reviewFlipped = !reviewFlipped;
-  const fc = document.getElementById('flip-card');
-  if (fc) fc.classList.toggle('flipped', reviewFlipped);
+  reviewFlipped = true;
+  const back = document.getElementById('flip-back');
+  if (back) back.classList.add('visible');
   const flipBtn = document.getElementById('flip-btn');
   if (flipBtn) flipBtn.style.display = 'none';
+  const typeRow = document.getElementById('type-row');
+  if (typeRow) typeRow.style.display = 'none';
   const rr = document.getElementById('rating-row');
   if (rr) rr.classList.add('visible');
+}
+
+function reviewKeyHandler(e) {
+  // ignore if typing in an input
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!reviewFlipped) flipCard(); }
+  if (reviewFlipped) {
+    if (e.key === '1') rateCard('again');
+    if (e.key === '2') rateCard('hard');
+    if (e.key === '3') rateCard('good');
+    if (e.key === '4') rateCard('easy');
+  }
 }
 
 function calcInterval(card, rating) {
