@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECALL — Memory Trainer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0e;
+    --bg-card: #161616;
+    --bg-hover: #1e1e1e;
+    --border: rgba(255,255,255,0.1);
+    --border-strong: rgba(255,255,255,0.2);
+    --text: #f0f0f0;
+    --text-muted: #888;
+    --text-faint: #555;
+    --accent: #c8f135;
+    --accent-dim: rgba(200,241,53,0.12);
+    --red: #ff5a36;
+    --red-dim: rgba(255,90,54,0.12);
+    --blue: #4d9de0;
+    --blue-dim: rgba(77,157,224,0.12);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .nav-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .nav-links li {
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .nav-links li:hover, .nav-links li.active { color: var(--text); }
+  .nav-links li.active { color: var(--accent); }
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .streak-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+  .btn-add {
+    background: var(--accent);
+    color: #0e0e0e;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    border: none;
+    padding: 8px 18px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    border-radius: 2px;
+    transition: opacity 0.15s;
+  }
+  .btn-add:hover { opacity: 0.85; }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── LIBRARY ── */
+  .library-hero {
+    padding: 52px 32px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-title {
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--text);
+  }
+  .page-subtitle {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 420px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 36px;
+  }
+  .hero-stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .hero-stat-num.danger { color: var(--red); }
+  .hero-stat-num.good { color: var(--accent); }
+  .hero-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px 16px;
+  }
+  .section-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* CARD GRID */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-left: 1px solid var(--border);
+    margin: 0 0 0 32px;
+    padding-right: 32px;
+  }
+  .text-card {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 20px 20px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .text-card:hover { background: var(--bg-hover); }
+  .card-tag {
+    display: inline-block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 12px;
+  }
+  .tag-due { background: var(--red-dim); color: var(--red); }
+  .tag-new { background: var(--blue-dim); color: var(--blue); }
+  .tag-mastered { background: var(--accent-dim); color: var(--accent); }
+  .card-title-text {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .card-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 16px;
+  }
+  .card-progress-track {
+    height: 2px;
+    background: rgba(255,255,255,0.07);
+    width: 100%;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .card-progress-fill {
+    height: 100%;
+    border-radius: 1px;
+    transition: width 0.3s;
+  }
+  .fill-red { background: var(--red); }
+  .fill-blue { background: var(--blue); }
+  .fill-green { background: var(--accent); }
+  .card-practice-btn {
+    margin-top: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    padding: 0;
+    text-transform: uppercase;
+  }
+  .card-practice-btn:hover { text-decoration: underline; }
+
+  /* ADD TEXT MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    padding: 32px;
+    width: 560px;
+    max-width: calc(100vw - 40px);
+    border-radius: 4px;
+  }
+  .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 20px;
+  }
+  .field-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 6px;
+  }
+  .text-input, .textarea-input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 16px;
+  }
+  .text-input:focus, .textarea-input:focus { border-color: var(--accent); }
+  .textarea-input { resize: vertical; min-height: 120px; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+  .btn-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    padding: 9px 20px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .btn-cancel:hover { border-color: var(--border-strong); color: var(--text); }
+  .btn-save {
+    background: var(--accent);
+    color: #0e0e0e;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    padding: 9px 24px;
+    cursor: pointer;
+    border-radius: 2px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* ── PRACTICE ── */
+  #panel-practice {
+    padding: 48px 32px;
+    max-width: 720px;
+  }
+  .practice-title {
+    font-size: 48px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .practice-source {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 36px;
+  }
+
+  /* mode selector */
+  .mode-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .mode-pill {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: 'Space Mono', monospace;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .mode-pill:hover { border-color: var(--border-strong); color: var(--text); }
+  .mode-pill.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  /* session area */
+  .session-box {
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 20px;
+    border-radius: 2px;
+    min-height: 140px;
+    position: relative;
+  }
+  .session-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 14px;
+  }
+  .passage-display {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--text);
+  }
+  .word {
+    display: inline;
+    transition: all 0.1s;
+  }
+  .word-correct { color: var(--accent); }
+  .word-error { color: var(--red); text-decoration: underline; }
+  .word-current {
+    background: rgba(200,241,53,0.15);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1px;
+  }
+  .word-hidden {
+    display: inline-block;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    min-width: 48px;
+    height: 20px;
+    vertical-align: middle;
+    margin: 0 2px;
+  }
+  .progress-strip {
+    height: 3px;
+    background: var(--border);
+    margin-bottom: 20px;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progress-strip-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 1px;
+    transition: width 0.3s;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .recall-input {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    padding: 12px 16px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .recall-input:focus { border-color: var(--accent); }
+  .recall-input.error { border-color: var(--red); }
+  .btn-check {
+    background: var(--accent);
+    color: #0e0e0e;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    padding: 12px 24px;
+    cursor: pointer;
+    border-radius: 2px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .btn-check:hover { opacity: 0.85; }
+  .btn-check:disabled { opacity: 0.3; cursor: not-allowed; }
+  .feedback-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    min-height: 24px;
+  }
+  .feedback-msg {
+    font-size: 13px;
+    font-family: 'Space Mono', monospace;
+  }
+  .feedback-msg.correct { color: var(--accent); }
+  .feedback-msg.wrong { color: var(--red); }
+  .session-score {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .hint-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 2px;
+    margin-top: 14px;
+  }
+  .hint-btn:hover { border-color: var(--border-strong); color: var(--text); }
+
+  /* blank recall mode */
+  .blank-recall-area {
+    width: 100%;
+    min-height: 180px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    padding: 16px;
+    border-radius: 2px;
+    outline: none;
+    resize: vertical;
+    line-height: 1.7;
+    margin-bottom: 12px;
+    transition: border-color 0.15s;
+  }
+  .blank-recall-area:focus { border-color: var(--accent); }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-secondary {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--border-strong); color: var(--text); }
+  .diff-result {
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.9;
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 2px;
+    display: none;
+  }
+  .diff-match { color: var(--accent); }
+  .diff-miss { color: var(--red); text-decoration: underline; }
+  .diff-extra { color: var(--text-muted); text-decoration: line-through; }
+
+  .completion-banner {
+    display: none;
+    padding: 28px;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    background: var(--accent-dim);
+    margin-top: 20px;
+  }
+  .completion-banner.show { display: block; }
+  .completion-title {
+    font-size: 22px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .completion-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── STATS ── */
+  #panel-stats {
+    padding: 48px 32px;
+  }
+  .stats-hero-title {
+    font-size: 64px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 32px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .stat-block {
+    padding: 28px 24px;
+    border-right: 1px solid var(--border);
+  }
+  .stat-block:last-child { border-right: none; }
+  .stat-block-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-block-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+  .streak-section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 14px;
+  }
+  .streak-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .streak-day {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text-faint);
+  }
+  .streak-day.done { background: var(--accent-dim); color: var(--accent); border-color: rgba(200,241,53,0.3); }
+  .streak-day.today { background: var(--accent); color: #0e0e0e; border-color: var(--accent); font-weight: 700; }
+  .accuracy-list { max-width: 500px; }
+  .accuracy-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .accuracy-row:first-child { border-top: 1px solid var(--border); }
+  .accuracy-name { font-size: 14px; flex: 1; }
+  .accuracy-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+    width: 40px;
+    text-align: right;
+  }
+  .accuracy-bar-track {
+    width: 120px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .accuracy-bar-fill { height: 100%; border-radius: 1px; }
+
+  /* empty state */
+  .empty-state {
+    padding: 80px 32px;
+    text-align: center;
+    color: var(--text-faint);
+  }
+  .empty-state-title {
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+  }
+  .empty-state-sub { font-size: 14px; }
+
+  /* no-text-selected */
+  .select-prompt {
+    padding: 60px 32px;
+    max-width: 500px;
+    color: var(--text-muted);
+  }
+  .select-prompt-title {
+    font-size: 28px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .select-prompt-sub { font-size: 14px; line-height: 1.6; }
+  .select-list {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 380px;
+  }
+  .select-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .select-item:hover { border-color: var(--border-strong); background: var(--bg-hover); }
+  .select-item-name { font-size: 14px; font-weight: 500; }
+  .select-item-words { font-size: 11px; color: var(--text-muted); font-family: 'Space Mono', monospace; }
+  .arrow { color: var(--text-faint); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPanel('library')">RECALL</div>
+  <ul class="nav-links">
+    <li id="nav-library" class="active" onclick="showPanel('library')">Library</li>
+    <li id="nav-practice" onclick="showPanel('practice')">Practice</li>
+    <li id="nav-stats" onclick="showPanel('stats')">Stats</li>
+  </ul>
+  <div class="nav-right">
+    <div class="streak-badge" id="streak-badge">🔥 6 days</div>
+    <button class="btn-add" onclick="openModal()">+ Add text</button>
+  </div>
+</nav>
+
+<!-- PANELS -->
+
+<!-- LIBRARY -->
+<div id="panel-library" class="panel active">
+  <div class="library-hero">
+    <div class="page-title">MEMORY<br>LIBRARY</div>
+    <div class="page-subtitle">Your saved passages. Practice daily to build word-perfect recall.</div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num" id="stat-total">0</div>
+        <div class="hero-stat-label">Texts saved</div>
+      </div>
+      <div>
+        <div class="hero-stat-num danger" id="stat-due">0</div>
+        <div class="hero-stat-label">Due today</div>
+      </div>
+      <div>
+        <div class="hero-stat-num good" id="stat-acc">—</div>
+        <div class="hero-stat-label">Avg accuracy</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="library-content">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-state-title">No texts yet</div>
+      <div class="empty-state-sub">Add a passage to start training your memory.</div>
+    </div>
+    <div id="due-section" style="display:none;">
+      <div class="section-header">
+        <div class="section-eyebrow">Due for review</div>
+      </div>
+      <div class="card-grid" id="due-grid"></div>
+    </div>
+    <div id="all-section" style="display:none;">
+      <div class="section-header">
+        <div class="section-eyebrow">All texts</div>
+      </div>
+      <div class="card-grid" id="all-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRACTICE -->
+<div id="panel-practice" class="panel">
+  <!-- Select prompt (no text chosen) -->
+  <div id="practice-select" class="select-prompt">
+    <div class="select-prompt-title">Choose a text</div>
+    <div class="select-prompt-sub">Select a passage from your library to begin a session.</div>
+    <div class="select-list" id="practice-select-list"></div>
+  </div>
+  <!-- Active session -->
+  <div id="practice-session" style="display:none; padding: 48px 32px; max-width: 720px;">
+    <div class="practice-title" id="session-title">—</div>
+    <div class="practice-source" id="session-source">—</div>
+    <div class="mode-row">
+      <button class="mode-pill active" onclick="setMode('chunk')" id="mode-chunk">Chunk build</button>
+      <button class="mode-pill" onclick="setMode('blank')" id="mode-blank">Blank recall</button>
+      <button class="mode-pill" onclick="setMode('reveal')" id="mode-reveal">Study</button>
+    </div>
+
+    <!-- CHUNK BUILD mode -->
+    <div id="mode-chunk-ui">
+      <div class="progress-strip"><div class="progress-strip-fill" id="chunk-progress" style="width:0%"></div></div>
+      <div class="session-box">
+        <div class="session-label">Passage — type each word to reveal</div>
+        <div class="passage-display" id="chunk-display"></div>
+      </div>
+      <div class="input-row">
+        <input class="recall-input" id="chunk-input" type="text" placeholder="type the next word..." autocomplete="off" autocorrect="off" spellcheck="false" />
+        <button class="btn-check" id="chunk-check-btn" onclick="checkChunk()">Check</button>
+      </div>
+      <div class="feedback-row">
+        <span class="feedback-msg" id="chunk-feedback"></span>
+        <span class="session-score" id="chunk-score">0 / 0</span>
+      </div>
+      <button class="hint-btn" onclick="giveHint()">hint</button>
+      <div class="completion-banner" id="chunk-complete">
+        <div class="completion-title">✓ Complete</div>
+        <div class="completion-sub" id="chunk-complete-sub"></div>
+      </div>
+    </div>
+
+    <!-- BLANK RECALL mode -->
+    <div id="mode-blank-ui" style="display:none;">
+      <div class="session-box">
+        <div class="session-label">Passage hidden — recall from memory</div>
+        <div style="color: var(--text-faint); font-size: 15px; font-style: italic;">The passage is hidden. Type everything you remember below.</div>
+      </div>
+      <textarea class="blank-recall-area" id="blank-input" placeholder="type the full passage from memory..."></textarea>
+      <div class="btn-row">
+        <button class="btn-check" onclick="checkBlank()">Check my recall</button>
+        <button class="btn-secondary" onclick="revealForStudy()">Reveal passage</button>
+      </div>
+      <div class="diff-result" id="diff-result"></div>
+    </div>
+
+    <!-- STUDY / REVEAL mode -->
+    <div id="mode-reveal-ui" style="display:none;">
+      <div class="session-box">
+        <div class="session-label">Study mode — read carefully</div>
+        <div class="passage-display" id="reveal-text"></div>
+      </div>
+      <button class="btn-check" onclick="setMode('chunk')">Start drilling →</button>
+    </div>
+
+    <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+      <button class="btn-secondary" onclick="backToSelect()">← Back to library</button>
+      <button class="btn-secondary" onclick="resetSession()">Reset session</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div id="panel-stats" class="panel">
+  <div style="padding: 48px 32px;">
+    <div class="stats-hero-title">PROGRESS</div>
+    <div class="stats-grid">
+      <div class="stat-block">
+        <div class="stat-block-num" id="s-total-sessions">0</div>
+        <div class="stat-block-label">Sessions</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-num" id="s-words-recalled">0</div>
+        <div class="stat-block-label">Words recalled</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-num" id="s-accuracy">—</div>
+        <div class="stat-block-label">Accuracy</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-num" id="s-streak">0</div>
+        <div class="stat-block-label">Day streak</div>
+      </div>
+    </div>
+    <div class="streak-section-title">Last 14 days</div>
+    <div class="streak-row" id="streak-row"></div>
+    <div class="streak-section-title">Accuracy by text</div>
+    <div class="accuracy-list" id="accuracy-list"></div>
+  </div>
+</div>
+
+<!-- ADD TEXT MODAL -->
+<div class="modal-overlay" id="modal" onclick="handleModalClick(event)">
+  <div class="modal">
+    <div class="modal-title">Add a text</div>
+    <div class="field-label">Title</div>
+    <input class="text-input" id="input-title" type="text" placeholder="e.g. Feynman on curiosity" />
+    <div class="field-label">Paste your passage</div>
+    <textarea class="textarea-input" id="input-passage" placeholder="Paste or type the text you want to memorise..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveText()">Save text</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'recall_v1';
+
+function loadState() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    return s ? JSON.parse(s) : defaultState();
+  } catch { return defaultState(); }
+}
+
+function defaultState() {
+  return {
+    texts: [],
+    sessions: [],
+    globalStats: { totalSessions: 0, wordsRecalled: 0, wordsAttempted: 0 },
+    activityLog: []
+  };
+}
+
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+let state = loadState();
+
+// Seed demo data if empty
+if (state.texts.length === 0) {
+  state.texts = [
+    {
+      id: 'demo1',
+      title: 'Gettysburg Address — opening',
+      text: 'Four score and seven years ago our fathers brought forth on this continent a new nation conceived in liberty and dedicated to the proposition that all men are created equal.',
+      added: Date.now() - 3 * 86400000,
+      nextReview: Date.now() - 86400000,
+      interval: 3,
+      accuracy: [],
+      sessions: 4
+    },
+    {
+      id: 'demo2',
+      title: 'Hamlet — to be or not to be',
+      text: 'To be or not to be that is the question whether tis nobler in the mind to suffer the slings and arrows of outrageous fortune or to take arms against a sea of troubles.',
+      added: Date.now() - 7 * 86400000,
+      nextReview: Date.now() - 2 * 86400000,
+      interval: 5,
+      accuracy: [72, 80, 88],
+      sessions: 3
+    },
+    {
+      id: 'demo3',
+      title: 'Feynman on curiosity',
+      text: 'I have a friend who\'s an artist and he\'s sometimes taken a view I don\'t agree with very well. He\'ll hold up a flower and say look how beautiful it is and I\'ll agree. But he also says I as a scientist take this all apart and it becomes a dull thing.',
+      added: Date.now() - 1 * 86400000,
+      nextReview: Date.now() + 86400000,
+      interval: 1,
+      accuracy: [65],
+      sessions: 1
+    }
+  ];
+  state.globalStats = { totalSessions: 8, wordsRecalled: 312, wordsAttempted: 380 };
+  state.activityLog = [1,1,1,0,1,1,1,1,0,1,1,0,1,1].map((v,i) => ({ day: i, done: v }));
+  saveState();
+}
+
+// ─── PANEL ROUTING ────────────────────────────────────────────────────────────
+let currentPanel = 'library';
+let activeTextId = null;
+let currentMode = 'chunk';
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  currentPanel = name;
+  if (name === 'library') renderLibrary();
+  if (name === 'practice') renderPracticeSelect();
+  if (name === 'stats') renderStats();
+}
+
+// ─── LIBRARY ─────────────────────────────────────────────────────────────────
+function renderLibrary() {
+  const texts = state.texts;
+  const now = Date.now();
+  const due = texts.filter(t => t.nextReview <= now);
+  const all = texts;
+
+  document.getElementById('stat-total').textContent = texts.length;
+  document.getElementById('stat-due').textContent = due.length;
+
+  const allAcc = texts.flatMap(t => t.accuracy);
+  document.getElementById('stat-acc').textContent = allAcc.length
+    ? Math.round(allAcc.reduce((a,b) => a+b, 0) / allAcc.length) + '%'
+    : '—';
+
+  document.getElementById('empty-state').style.display = texts.length === 0 ? 'block' : 'none';
+
+  const dueSection = document.getElementById('due-section');
+  const allSection = document.getElementById('all-section');
+
+  if (due.length > 0) {
+    dueSection.style.display = 'block';
+    document.getElementById('due-grid').innerHTML = due.map(t => textCard(t, true)).join('');
+  } else {
+    dueSection.style.display = 'none';
+  }
+
+  if (all.length > 0) {
+    allSection.style.display = 'block';
+    document.getElementById('all-grid').innerHTML = all.map(t => textCard(t, false)).join('');
+  } else {
+    allSection.style.display = 'none';
+  }
+}
+
+function textCard(t, isDueSection) {
+  const now = Date.now();
+  const isDue = t.nextReview <= now;
+  const isNew = t.sessions === 0;
+  const isMastered = t.accuracy.length >= 3 && avg(t.accuracy.slice(-3)) >= 90;
+
+  let tagHtml = '';
+  if (isDue) tagHtml = '<span class="card-tag tag-due">Due</span>';
+  else if (isNew) tagHtml = '<span class="card-tag tag-new">New</span>';
+  else if (isMastered) tagHtml = '<span class="card-tag tag-mastered">Mastered</span>';
+
+  const words = t.text.split(/\s+/).length;
+  const lastAcc = t.accuracy.length ? t.accuracy[t.accuracy.length - 1] : 0;
+  const fillClass = lastAcc >= 80 ? 'fill-green' : lastAcc >= 50 ? 'fill-blue' : 'fill-red';
+
+  return `<div class="text-card" onclick="startPractice('${t.id}')">
+    ${tagHtml}
+    <div class="card-title-text">${esc(t.title)}</div>
+    <div class="card-meta">${words} words · ${t.sessions} session${t.sessions !== 1 ? 's' : ''}</div>
+    <div class="card-progress-track">
+      <div class="card-progress-fill ${fillClass}" style="width:${lastAcc}%"></div>
+    </div>
+    <button class="card-practice-btn">Practice →</button>
+  </div>`;
+}
+
+function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('input-title').focus();
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('input-title').value = '';
+  document.getElementById('input-passage').value = '';
+}
+function handleModalClick(e) { if (e.target === e.currentTarget) closeModal(); }
+
+function saveText() {
+  const title = document.getElementById('input-title').value.trim();
+  const text = document.getElementById('input-passage').value.trim();
+  if (!title || !text) { alert('Please enter both a title and passage.'); return; }
+  const entry = {
+    id: 'txt_' + Date.now(),
+    title, text,
+    added: Date.now(),
+    nextReview: Date.now(),
+    interval: 1,
+    accuracy: [],
+    sessions: 0
+  };
+  state.texts.push(entry);
+  saveState();
+  closeModal();
+  renderLibrary();
+}
+
+// ─── PRACTICE ─────────────────────────────────────────────────────────────────
+function renderPracticeSelect() {
+  const list = document.getElementById('practice-select-list');
+  list.innerHTML = state.texts.map(t => `
+    <div class="select-item" onclick="startPractice('${t.id}')">
+      <div>
+        <div class="select-item-name">${esc(t.title)}</div>
+        <div class="select-item-words">${t.text.split(/\s+/).length} words</div>
+      </div>
+      <span class="arrow">→</span>
+    </div>`).join('');
+  document.getElementById('practice-select').style.display = activeTextId ? 'none' : 'block';
+  document.getElementById('practice-session').style.display = activeTextId ? 'block' : 'none';
+}
+
+function startPractice(id) {
+  activeTextId = id;
+  showPanel('practice');
+  const t = state.texts.find(x => x.id === id);
+  document.getElementById('session-title').textContent = t.title.toUpperCase();
+  document.getElementById('session-source').textContent = t.text.split(/\s+/).length + ' words';
+  document.getElementById('practice-select').style.display = 'none';
+  document.getElementById('practice-session').style.display = 'block';
+  setMode('chunk');
+}
+
+function backToSelect() {
+  activeTextId = null;
+  renderPracticeSelect();
+}
+
+// ─── MODES ────────────────────────────────────────────────────────────────────
+function setMode(m) {
+  currentMode = m;
+  ['chunk','blank','reveal'].forEach(x => {
+    document.getElementById('mode-' + x).classList.toggle('active', x === m);
+    document.getElementById('mode-' + x + '-ui').style.display = x === m ? 'block' : 'none';
+  });
+  if (m === 'chunk') initChunk();
+  if (m === 'blank') initBlank();
+  if (m === 'reveal') initReveal();
+}
+
+// ─── CHUNK BUILD ──────────────────────────────────────────────────────────────
+let chunkWords = [];
+let chunkIndex = 0;
+let chunkCorrect = 0;
+let chunkAttempts = 0;
+
+function initChunk() {
+  const t = state.texts.find(x => x.id === activeTextId);
+  chunkWords = t.text.split(/\s+/);
+  chunkIndex = 0;
+  chunkCorrect = 0;
+  chunkAttempts = 0;
+  document.getElementById('chunk-feedback').textContent = '';
+  document.getElementById('chunk-input').value = '';
+  document.getElementById('chunk-input').classList.remove('error');
+  document.getElementById('chunk-complete').classList.remove('show');
+  renderChunk();
+  document.getElementById('chunk-input').focus();
+  document.getElementById('chunk-input').onkeydown = e => { if (e.key === 'Enter') checkChunk(); };
+}
+
+function renderChunk() {
+  const score = chunkWords.length > 0 ? Math.round(chunkIndex / chunkWords.length * 100) : 0;
+  document.getElementById('chunk-progress').style.width = score + '%';
+  document.getElementById('chunk-score').textContent = chunkIndex + ' / ' + chunkWords.length;
+
+  let html = '';
+  for (let i = 0; i < chunkWords.length; i++) {
+    if (i < chunkIndex) {
+      html += '<span class="word word-correct">' + esc(chunkWords[i]) + '</span> ';
+    } else if (i === chunkIndex) {
+      html += '<span class="word word-current">▮</span> ';
+    } else {
+      html += '<span class="word-hidden"></span> ';
+    }
+  }
+  document.getElementById('chunk-display').innerHTML = html;
+}
+
+function normalize(s) { return s.trim().toLowerCase().replace(/[^a-z0-9']/g, ''); }
+
+function checkChunk() {
+  if (chunkIndex >= chunkWords.length) return;
+  const input = document.getElementById('chunk-input');
+  const typed = input.value;
+  const target = chunkWords[chunkIndex];
+  chunkAttempts++;
+
+  if (normalize(typed) === normalize(target)) {
+    chunkIndex++;
+    chunkCorrect++;
+    input.value = '';
+    input.classList.remove('error');
+    document.getElementById('chunk-feedback').textContent = '';
+    document.getElementById('chunk-feedback').className = 'feedback-msg';
+
+    if (chunkIndex >= chunkWords.length) {
+      // Complete
+      renderChunk();
+      const acc = Math.round((chunkCorrect / chunkAttempts) * 100);
+      finishSession(acc);
+      document.getElementById('chunk-complete').classList.add('show');
+      document.getElementById('chunk-complete-sub').textContent =
+        'Accuracy: ' + acc + '% · ' + chunkWords.length + ' words recalled';
+      document.getElementById('chunk-input').disabled = true;
+      document.getElementById('chunk-check-btn').disabled = true;
+    } else {
+      renderChunk();
+      input.focus();
+    }
+  } else {
+    input.classList.add('error');
+    document.getElementById('chunk-feedback').textContent = '✗ try again';
+    document.getElementById('chunk-feedback').className = 'feedback-msg wrong';
+    input.select();
+  }
+}
+
+function giveHint() {
+  if (chunkIndex >= chunkWords.length) return;
+  const word = chunkWords[chunkIndex];
+  const hint = word.slice(0, Math.ceil(word.length / 2)) + '...';
+  document.getElementById('chunk-feedback').textContent = 'hint: ' + hint;
+  document.getElementById('chunk-feedback').className = 'feedback-msg';
+  document.getElementById('chunk-input').focus();
+}
+
+function resetSession() {
+  document.getElementById('chunk-input').disabled = false;
+  document.getElementById('chunk-check-btn').disabled = false;
+  setMode(currentMode);
+}
+
+// ─── BLANK RECALL ─────────────────────────────────────────────────────────────
+function initBlank() {
+  document.getElementById('blank-input').value = '';
+  document.getElementById('diff-result').style.display = 'none';
+}
+
+function checkBlank() {
+  const t = state.texts.find(x => x.id === activeTextId);
+  const typed = document.getElementById('blank-input').value;
+  const targetWords = t.text.split(/\s+/).map(normalize);
+  const typedWords = typed.trim().split(/\s+/).map(normalize);
+
+  let correct = 0;
+  let html = '';
+  for (let i = 0; i < targetWords.length; i++) {
+    const tw = targetWords[i];
+    const uw = typedWords[i] || '';
+    if (uw === tw) {
+      html += '<span class="diff-match">' + esc(t.text.split(/\s+/)[i]) + '</span> ';
+      correct++;
+    } else if (uw === '') {
+      html += '<span class="diff-miss">[' + esc(t.text.split(/\s+/)[i]) + ']</span> ';
+    } else {
+      html += '<span class="diff-miss">' + esc(t.text.split(/\s+/)[i]) + '</span> ';
+    }
+  }
+
+  const acc = Math.round((correct / targetWords.length) * 100);
+  const diffEl = document.getElementById('diff-result');
+  diffEl.innerHTML = '<div style="margin-bottom:12px; font-family:Space Mono,monospace; font-size:12px; color:var(--text-muted);">accuracy: ' + acc + '% · ' + correct + '/' + targetWords.length + ' words correct</div>' + html;
+  diffEl.style.display = 'block';
+  finishSession(acc);
+}
+
+function revealForStudy() {
+  setMode('reveal');
+}
+
+// ─── STUDY MODE ───────────────────────────────────────────────────────────────
+function initReveal() {
+  const t = state.texts.find(x => x.id === activeTextId);
+  document.getElementById('reveal-text').textContent = t.text;
+}
+
+// ─── SESSION FINISH ───────────────────────────────────────────────────────────
+function finishSession(accuracy) {
+  const t = state.texts.find(x => x.id === activeTextId);
+  t.accuracy.push(accuracy);
+  t.sessions++;
+  // SM-2-style interval update
+  if (accuracy >= 80) t.interval = Math.min(t.interval * 2.5, 30);
+  else if (accuracy >= 60) t.interval = Math.max(t.interval, 2);
+  else t.interval = 1;
+  t.nextReview = Date.now() + t.interval * 86400000;
+
+  state.globalStats.totalSessions++;
+  const t2 = state.texts.find(x => x.id === activeTextId);
+  state.globalStats.wordsRecalled += Math.round(t2.text.split(/\s+/).length * accuracy / 100);
+  state.globalStats.wordsAttempted += t2.text.split(/\s+/).length;
+
+  // log today
+  const today = new Date().toDateString();
+  if (!state.activityLog.find(x => x.day === today)) {
+    state.activityLog.push({ day: today, done: 1 });
+  }
+  saveState();
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function renderStats() {
+  const gs = state.globalStats;
+  document.getElementById('s-total-sessions').textContent = gs.totalSessions;
+  document.getElementById('s-words-recalled').textContent = gs.wordsRecalled;
+  const accPct = gs.wordsAttempted > 0
+    ? Math.round(gs.wordsRecalled / gs.wordsAttempted * 100) + '%'
+    : '—';
+  document.getElementById('s-accuracy').textContent = accPct;
+
+  // streak (count consecutive days with activity from today backwards)
+  // simplified: use activityLog length as proxy
+  const streak = state.activityLog.filter(x => x.done).length;
+  document.getElementById('s-streak').textContent = streak;
+  document.getElementById('streak-badge').textContent = '🔥 ' + streak + ' days';
+
+  // 14-day streak row
+  const row = document.getElementById('streak-row');
+  const days = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  row.innerHTML = '';
+  const log = state.activityLog;
+  for (let i = 13; i >= 0; i--) {
+    const isDone = log[log.length - 1 - i]?.done;
+    const isToday = i === 0;
+    const d = document.createElement('div');
+    d.className = 'streak-day' + (isToday ? ' today' : isDone ? ' done' : '');
+    d.textContent = isToday ? '★' : isDone ? '✓' : '·';
+    row.appendChild(d);
+  }
+
+  // accuracy list
+  const accList = document.getElementById('accuracy-list');
+  accList.innerHTML = state.texts.map(t => {
+    const a = t.accuracy.length ? Math.round(avg(t.accuracy)) : 0;
+    const fillColor = a >= 80 ? 'var(--accent)' : a >= 60 ? 'var(--blue)' : 'var(--red)';
+    return `<div class="accuracy-row">
+      <div class="accuracy-name">${esc(t.title)}</div>
+      <div class="accuracy-bar-track"><div class="accuracy-bar-fill" style="width:${a}%;background:${fillColor}"></div></div>
+      <div class="accuracy-pct">${a || '—'}${a ? '%' : ''}</div>
+    </div>`;
+  }).join('') || '<div style="padding:20px 0; color:var(--text-faint); font-size:14px;">No data yet</div>';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderLibrary();
+</script>
+</body>
+</html>
