@@ -140,8 +140,14 @@
   .cloze-blank-prev { background: rgba(200,241,53,0.15); color: var(--accent); border-bottom: 1px solid var(--accent); padding: 0 3px; }
 
   /* code blocks */
-  .code-block { background: #111; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; margin: 10px 0; overflow: hidden; }
-  .code-lang { display: block; font-family: 'Space Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); padding: 6px 14px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); }
+  .code-block { border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; margin: 10px 0; overflow: hidden; background: #111; }
+  .code-toggle { display: flex; align-items: center; gap: 8px; padding: 8px 14px; cursor: pointer; user-select: none; transition: background 0.12s; }
+  .code-toggle:hover { background: rgba(255,255,255,0.04); }
+  .code-toggle-icon { font-size: 9px; color: var(--text-faint); transition: transform 0.2s; flex-shrink: 0; }
+  .code-toggle-icon.open { transform: rotate(90deg); }
+  .code-lang-label { font-family: 'Space Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); }
+  .code-toggle-hint { font-size: 11px; color: var(--text-faint); margin-left: auto; font-family: 'Space Mono', monospace; }
+  .code-body { border-top: 1px solid rgba(255,255,255,0.06); }
   .code-block pre { margin: 0; padding: 14px 16px; overflow-x: auto; }
   .code-block code { font-family: 'Space Mono', monospace; font-size: 13px; line-height: 1.65; color: #c9d1d9; background: none; padding: 0; }
   /* python syntax colors */
@@ -369,6 +375,17 @@ let clozeBlankIdx = 0, clozeAnswers = [], clozeCorrect = 0;
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function norm(s) { return (s||'').trim().toLowerCase().replace(/[^a-z0-9']/g,''); }
 
+function toggleCode(id) {
+  const body = document.getElementById(id);
+  const icon = document.getElementById('icon_' + id);
+  const hint = document.getElementById('hint_' + id);
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (icon) icon.classList.toggle('open', !isOpen);
+  if (hint) hint.textContent = isOpen ? 'show code' : 'hide code';
+}
+
 function applyInline(html) {
   html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   html = html.replace(/_(.+?)_/g, '<em>$1</em>');
@@ -419,26 +436,32 @@ function highlightPython(raw) {
 }
 
 function renderCodeBlock(raw, lang) {
-  // highlight on raw (unescaped) text
   const isPython = (lang === 'python' || lang === 'py' || !lang);
+  const labelText = lang || 'code';
+  const id = 'cb_' + Math.random().toString(36).slice(2, 8);
   const highlighted = isPython ? highlightPython(raw.trim()) : esc(raw.trim());
-  const label = lang ? `<span class="code-lang">${esc(lang)}</span>` : '';
-  return `<div class="code-block">${label}<pre><code>${highlighted}</code></pre></div>`;
+  return `<div class="code-block">
+    <div class="code-toggle" onclick="toggleCode('${id}')">
+      <span class="code-toggle-icon" id="icon_${id}">▶</span>
+      <span class="code-lang-label">${esc(labelText)}</span>
+      <span class="code-toggle-hint" id="hint_${id}">show code</span>
+    </div>
+    <div class="code-body" id="${id}" style="display:none;">
+      <pre><code>${highlighted}</code></pre>
+    </div>
+  </div>`;
 }
 
 function md(text) {
   if (!text) return '';
-  // extract fenced code blocks BEFORE any escaping
   const blocks = [];
   const stripped = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
     blocks.push(renderCodeBlock(code, lang.toLowerCase().trim()));
     return `\x01BLOCK${blocks.length - 1}\x01`;
   });
-  // now escape and apply inline markdown
   let h = esc(stripped);
   h = applyInline(h);
   h = applyStructure(h);
-  // restore code blocks
   h = h.replace(/\x01BLOCK(\d+)\x01/g, (_, i) => blocks[+i]);
   return h;
 }
@@ -936,17 +959,12 @@ function renderClozeRev(main, card, pct) {
 
 function renderClozeStep(card) {
   const cur = clozeBlankIdx;
-
-  // save scroll position before DOM update
   const mainArea = document.getElementById('main-area');
   const scrollY = mainArea ? mainArea.scrollTop : 0;
 
   let blankCount = 0;
-  const MARKERS = [];
-  const markedText = card.clozeText.replace(/\{\{c\d+::(.+?)\}\}/g, (_, ans) => {
-    const i = blankCount++;
-    MARKERS.push({ i, ans });
-    return `\x02BLANK${i}\x02`;
+  const markedText = card.clozeText.replace(/\{\{c\d+::(.+?)\}\}/g, () => {
+    return `\x02BLANK${blankCount++}\x02`;
   });
 
   let html = md(markedText);
@@ -971,8 +989,6 @@ function renderClozeStep(card) {
   if (d) d.innerHTML = html;
   const ctr = document.getElementById('blank-counter');
   if (ctr) ctr.textContent = (cur + 1) + ' / ' + clozeAnswers.length;
-
-  // restore scroll position immediately after DOM update
   if (mainArea) mainArea.scrollTop = scrollY;
 }
 
