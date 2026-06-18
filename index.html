@@ -69,6 +69,7 @@
 
   /* MAIN AREA */
   .main { padding: 36px 40px; }
+  #main-area { overflow-y: auto; }
   .deck-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
   .deck-title { font-size: 42px; font-weight: 700; text-transform: uppercase; letter-spacing: -0.01em; line-height: 1; }
   .deck-meta { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-family: 'Space Mono', monospace; }
@@ -698,12 +699,15 @@ function setCardType(t) {
 }
 
 function updatePreviews() {
+  const modal = document.querySelector('.modal');
+  const modalScroll = modal ? modal.scrollTop : 0;
   if (cardType === 'basic') {
     document.getElementById('pf').innerHTML = md(document.getElementById('ef').value);
     document.getElementById('pb').innerHTML = md(document.getElementById('eb').value);
   } else {
     document.getElementById('pc').innerHTML = mdClozeBlanked(document.getElementById('ec').value);
   }
+  if (modal) requestAnimationFrame(() => { modal.scrollTop = modalScroll; });
 }
 
 function saveCard() {
@@ -787,12 +791,16 @@ function insertBullet(id) {
 }
 function insertClozeTag() {
   const el = document.getElementById('ec');
+  const scrollTop = el.scrollTop;
   const s = el.selectionStart, e = el.selectionEnd;
   const sel = el.value.slice(s, e) || 'answer';
   const tag = `{{c${clozeN}::${sel}}}`;
   clozeN++;
   el.value = el.value.slice(0, s) + tag + el.value.slice(e);
-  el.focus(); updatePreviews();
+  el.selectionStart = el.selectionEnd = s + tag.length;
+  el.scrollTop = scrollTop;
+  el.focus();
+  updatePreviews();
 }
 function insertCodeBlock(id) {
   const el = document.getElementById(id);
@@ -922,17 +930,29 @@ function renderClozeRev(main, card, pct) {
   renderClozeStep(card);
   setTimeout(() => {
     const f = document.getElementById('cloze-ans');
-    if (f) { f.focus(); f.onkeydown = e => { if (e.key === 'Enter') checkCloze(); }; }
+    if (f) { f.focus({ preventScroll: true }); f.onkeydown = e => { if (e.key === 'Enter') checkCloze(); }; }
   }, 50);
 }
 
 function renderClozeStep(card) {
   const cur = clozeBlankIdx;
+
+  // save scroll position before DOM update
+  const mainArea = document.getElementById('main-area');
+  const scrollY = mainArea ? mainArea.scrollTop : 0;
+
   let blankCount = 0;
-  let html = esc(card.clozeText);
-  html = applyInline(html);
-  html = html.replace(/\{\{c\d+::(.+?)\}\}/g, (_, ans) => {
+  const MARKERS = [];
+  const markedText = card.clozeText.replace(/\{\{c\d+::(.+?)\}\}/g, (_, ans) => {
     const i = blankCount++;
+    MARKERS.push({ i, ans });
+    return `\x02BLANK${i}\x02`;
+  });
+
+  let html = md(markedText);
+
+  const replaceMarker = (idx) => {
+    const i = +idx;
     if (i < cur) {
       const ok = clozeAnswers[i]._ok;
       const col = ok ? 'var(--accent)' : 'var(--red)';
@@ -942,12 +962,18 @@ function renderClozeStep(card) {
     } else {
       return `<span style="background:rgba(255,255,255,0.06);padding:0 4px;border-radius:2px;color:var(--text-muted)">[...]</span>`;
     }
-  });
-  html = applyStructure(html);
+  };
+
+  html = html.replace(/\x02BLANK(\d+)\x02/g, (_, idx) => replaceMarker(idx));
+  html = html.replace(/&#x2;BLANK(\d+)&#x2;/g, (_, idx) => replaceMarker(idx));
+
   const d = document.getElementById('cloze-display');
   if (d) d.innerHTML = html;
   const ctr = document.getElementById('blank-counter');
   if (ctr) ctr.textContent = (cur + 1) + ' / ' + clozeAnswers.length;
+
+  // restore scroll position immediately after DOM update
+  if (mainArea) mainArea.scrollTop = scrollY;
 }
 
 function checkCloze() {
@@ -975,7 +1001,8 @@ function checkCloze() {
     renderClozeStep(card);
     input.value = '';
     input.classList.remove('err');
-    setTimeout(() => input.focus(), 50);
+    // preventScroll stops the page jumping down when we refocus the input
+    setTimeout(() => input.focus({ preventScroll: true }), 50);
   }
 }
 
