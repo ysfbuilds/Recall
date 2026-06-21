@@ -75,6 +75,19 @@
   .deck-item-count { font-size: 11px; color: var(--text-faint); font-family: 'Space Mono', monospace; }
   .deck-item-due { font-size: 10px; color: var(--red); font-family: 'Space Mono', monospace; }
 
+  /* tags */
+  .tag-pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--purple-dim); color: var(--purple); font-family: 'Space Mono', monospace; cursor: pointer; transition: all 0.12s; border: 1px solid transparent; }
+  .tag-pill:hover { border-color: var(--purple); }
+  .tag-pill.active { background: var(--purple); color: var(--bg); }
+  .tag-pill.removable::after { content: " ×"; opacity: 0.6; }
+  .tag-filter-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .tag-filter-row .tag-pill.all { background: var(--bg-hover); color: var(--text-muted); }
+  .tag-filter-row .tag-pill.all.active { background: var(--text); color: var(--bg); }
+  .card-tags-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .editor-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .tag-input-row { display: flex; gap: 6px; margin-bottom: 16px; }
+  .tag-input-row input { flex: 1; }
+
   /* MAIN AREA */
   .main { padding: 36px 40px; }
   #main-area { overflow-y: auto; }
@@ -327,6 +340,13 @@
       <div class="preview-box" id="pc"></div>
     </div>
 
+    <div class="field-label">Tags <span style="color:var(--text-faint);font-size:11px;text-transform:none;letter-spacing:0;">(optional — for filtered review)</span></div>
+    <div class="editor-tags-row" id="editor-tags-row"></div>
+    <div class="tag-input-row">
+      <input class="text-input" id="tag-input" type="text" placeholder="e.g. http, attacks, fundamentals..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTagFromInput();}" />
+      <button class="btn-secondary" onclick="addTagFromInput()" type="button">Add</button>
+    </div>
+
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeCardEditor()">Cancel</button>
       <button class="btn-save" onclick="saveCard()">Save card</button>
@@ -381,10 +401,23 @@ if (state.decks.length === 0) {
   state.folders.push({ id: fid, name: 'Computer Science', collapsed: false });
   state.decks.push({ id: did, name: 'Data Structures', folderId: fid });
   state.cards.push(
-    { id: 'c1', deckId: did, type: 'basic', front: 'What is **Big O notation**?', back: 'A way to describe algorithm _efficiency_ — how runtime or space grows as input size increases.\n- O(1): constant\n- O(n): linear\n- O(n²): quadratic', interval: 1, due: Date.now() - 86400000, ease: 2.5, reps: 2 },
-    { id: 'c2', deckId: did, type: 'basic', front: 'How do you implement a binary search in Python?', back: '```python\ndef binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n```', interval: 3, due: Date.now() + 86400000, ease: 2.5, reps: 4 },
-    { id: 'c3', deckId: did, type: 'cloze', clozeText: 'A {{c1::hash table}} uses a {{c2::hash function}} to map keys to indices, giving O({{c3::1}}) average lookup.', interval: 1, due: Date.now() - 86400000, ease: 2.5, reps: 1 }
+    { id: 'c1', deckId: did, type: 'basic', front: 'What is **Big O notation**?', back: 'A way to describe algorithm _efficiency_ — how runtime or space grows as input size increases.\n- O(1): constant\n- O(n): linear\n- O(n²): quadratic', interval: 1, due: Date.now() - 86400000, ease: 2.5, reps: 2, tags: ['fundamentals'] },
+    { id: 'c2', deckId: did, type: 'basic', front: 'How do you implement a binary search in Python?', back: '```python\ndef binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n```', interval: 3, due: Date.now() + 86400000, ease: 2.5, reps: 4, tags: ['algorithms', 'python'] },
+    { id: 'c3', deckId: did, type: 'cloze', clozeText: 'A {{c1::hash table}} uses a {{c2::hash function}} to map keys to indices, giving O({{c3::1}}) average lookup.', interval: 1, due: Date.now() - 86400000, ease: 2.5, reps: 1, tags: ['fundamentals'] }
   );
+
+  // demo: a security deck with mixed topics, organized via tags
+  const secFid = 'folder_security';
+  const secDid = 'deck_netsec';
+  state.folders.push({ id: secFid, name: 'Security', collapsed: false });
+  state.decks.push({ id: secDid, name: 'Network Security', folderId: secFid });
+  state.cards.push(
+    { id: 'c4', deckId: secDid, type: 'basic', front: 'What HTTP method is **idempotent** and should never mutate state?', back: '`GET` — safe to cache, repeatable with no side effects.', interval: 2, due: Date.now() - 86400000, ease: 2.5, reps: 2, tags: ['http'] },
+    { id: 'c5', deckId: secDid, type: 'cloze', clozeText: 'A {{c1::301}} redirect is permanent, while a {{c2::302}} redirect is temporary.', interval: 1, due: Date.now() + 86400000, ease: 2.5, reps: 1, tags: ['http'] },
+    { id: 'c6', deckId: secDid, type: 'basic', front: 'What is a **man-in-the-middle** attack?', back: 'An attacker secretly intercepts and possibly alters communications between two parties who believe they are communicating directly.', interval: 1, due: Date.now() - 86400000, ease: 2.5, reps: 0, tags: ['attacks'] },
+    { id: 'c7', deckId: secDid, type: 'basic', front: 'What is **defense in depth**?', back: 'A layered security approach — multiple independent controls so a single failure doesn\'t compromise the whole system.', interval: 1, due: Date.now() + 2*86400000, ease: 2.5, reps: 1, tags: ['fundamentals'] }
+  );
+
   save();
 }
 
@@ -392,6 +425,7 @@ let activeDeckId = null;
 let editingCardId = null;
 let cardType = 'basic';
 let clozeN = 1;
+let currentEditorTags = [];
 
 // review state
 let revQueue = [], revIdx = 0, revFlipped = false, revResults = {};
@@ -584,17 +618,44 @@ function toggleFolder(id) {
 // ─── SELECT DECK ──────────────────────────────────────────────────────────────
 function selectDeck(id) {
   activeDeckId = id;
+  activeTagFilter = null; // reset filter when switching decks
   renderSidebar();
   renderDeckMain();
+}
+
+function setTagFilter(tag) {
+  activeTagFilter = tag;
+  renderDeckMain();
+}
+
+function getDeckTags(deckId) {
+  const cards = state.cards.filter(c => c.deckId === deckId);
+  const tagSet = new Set();
+  cards.forEach(c => (c.tags || []).forEach(t => tagSet.add(t)));
+  return [...tagSet].sort();
 }
 
 function renderDeckMain() {
   const deck = state.decks.find(d => d.id === activeDeckId);
   if (!deck) return;
-  const cards = state.cards.filter(c => c.deckId === activeDeckId);
-  const due = cards.filter(c => c.due <= Date.now()).length;
+  const allCards = state.cards.filter(c => c.deckId === activeDeckId);
+  const due = allCards.filter(c => c.due <= Date.now()).length;
   const folder = deck.folderId ? state.folders.find(f => f.id === deck.folderId) : null;
   const main = document.getElementById('main-area');
+  const tags = getDeckTags(activeDeckId);
+
+  // apply tag filter for display + review
+  const visibleCards = activeTagFilter ? allCards.filter(c => (c.tags || []).includes(activeTagFilter)) : allCards;
+  const visibleDue = visibleCards.filter(c => c.due <= Date.now()).length;
+
+  const tagFilterRow = tags.length > 0 ? `
+    <div class="tag-filter-row">
+      <span class="tag-pill all${!activeTagFilter ? ' active' : ''}" onclick="setTagFilter(null)">All (${allCards.length})</span>
+      ${tags.map(t => {
+        const count = allCards.filter(c => (c.tags || []).includes(t)).length;
+        return `<span class="tag-pill${activeTagFilter === t ? ' active' : ''}" onclick="setTagFilter('${esc(t)}')">${esc(t)} (${count})</span>`;
+      }).join('')}
+    </div>` : '';
 
   main.innerHTML = `
     <div class="main">
@@ -602,19 +663,20 @@ function renderDeckMain() {
         <div>
           ${folder ? `<div style="font-size:11px;color:var(--purple);font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">${esc(folder.name)}</div>` : ''}
           <div class="deck-title">${esc(deck.name)}</div>
-          <div class="deck-meta">${cards.length} card${cards.length !== 1 ? 's' : ''} · ${due} due</div>
+          <div class="deck-meta">${allCards.length} card${allCards.length !== 1 ? 's' : ''} · ${due} due${activeTagFilter ? ` · showing "${esc(activeTagFilter)}" (${visibleCards.length})` : ''}</div>
         </div>
         <div class="deck-actions">
-          ${due > 0 ? `<button class="btn-add" onclick="startReview(false)">Review ${due} due</button>` : ''}
-          ${cards.length > 0 ? `<button class="btn-secondary" onclick="startReview(true)">Review all</button>` : ''}
+          ${visibleDue > 0 ? `<button class="btn-add" onclick="startReview(false)">Review ${visibleDue} due</button>` : ''}
+          ${visibleCards.length > 0 ? `<button class="btn-secondary" onclick="startReview(true)">Review all${activeTagFilter ? ' (' + activeTagFilter + ')' : ''}</button>` : ''}
           <button class="btn-secondary" onclick="openMoveDeckModal('${activeDeckId}')">Move / Rename</button>
           <button class="btn-secondary" onclick="deleteDeck('${activeDeckId}')">Delete</button>
         </div>
       </div>
+      ${tagFilterRow}
       <div class="card-list">
-        ${cards.length === 0
-          ? `<div class="empty-state"><div class="empty-title">No cards yet</div><div>Add your first card to start practising.</div></div>`
-          : cards.map(c => cardRow(c)).join('')}
+        ${visibleCards.length === 0
+          ? `<div class="empty-state"><div class="empty-title">No cards${activeTagFilter ? ' with this tag' : ' yet'}</div><div>${activeTagFilter ? 'Try a different tag or clear the filter.' : 'Add your first card to start practising.'}</div></div>`
+          : visibleCards.map(c => cardRow(c)).join('')}
       </div>
     </div>`;
 }
@@ -624,14 +686,21 @@ function cardRow(c) {
   const front = c.type === 'cloze'
     ? c.clozeText.replace(/\{\{c\d+::(.+?)\}\}/g,'[...]').slice(0,120)
     : (c.front || '').slice(0,120);
-  return `<div class="card-row" onclick="openCardEditor('${c.id}')">
-    <span class="card-type-badge ${c.type === 'cloze' ? 'type-cloze' : 'type-basic'}">${c.type}</span>
-    <div class="card-row-front">${md(front)}</div>
-    ${isDue ? '<span class="card-due-tag">due</span>' : ''}
-    <div class="card-row-btns" onclick="event.stopPropagation()">
-      <button class="card-btn" onclick="resetCard('${c.id}')">Reset</button>
-      <button class="card-btn del" data-del="${c.id}" onclick="deleteCard('${c.id}')">Delete</button>
+  const tags = c.tags || [];
+  const tagsHtml = tags.length > 0
+    ? `<div class="card-tags-row">${tags.map(t => `<span class="tag-pill" onclick="event.stopPropagation(); setTagFilter('${esc(t)}')">${esc(t)}</span>`).join('')}</div>`
+    : '';
+  return `<div class="card-row" onclick="openCardEditor('${c.id}')" style="flex-direction:column;align-items:stretch;">
+    <div style="display:flex;align-items:flex-start;gap:12px;width:100%;">
+      <span class="card-type-badge ${c.type === 'cloze' ? 'type-cloze' : 'type-basic'}">${c.type}</span>
+      <div class="card-row-front" style="flex:1;">${md(front)}</div>
+      ${isDue ? '<span class="card-due-tag">due</span>' : ''}
+      <div class="card-row-btns" onclick="event.stopPropagation()">
+        <button class="card-btn" onclick="resetCard('${c.id}')">Reset</button>
+        <button class="card-btn del" data-del="${c.id}" onclick="deleteCard('${c.id}')">Delete</button>
+      </div>
     </div>
+    ${tagsHtml}
   </div>`;
 }
 
@@ -725,13 +794,16 @@ function openCardEditor(cardId) {
     } else {
       document.getElementById('ec').value = c.clozeText || '';
     }
+    currentEditorTags = [...(c.tags || [])];
   } else {
     document.getElementById('card-modal-title').textContent = 'New card';
     setCardType('basic');
     document.getElementById('ef').value = '';
     document.getElementById('eb').value = '';
     document.getElementById('ec').value = '';
+    currentEditorTags = [];
   }
+  renderEditorTags();
   updatePreviews();
   document.getElementById('card-overlay').classList.add('open');
   setTimeout(() => document.getElementById(cardType === 'cloze' ? 'ec' : 'ef').focus(), 50);
@@ -767,6 +839,31 @@ function updatePreviews() {
   if (modal) requestAnimationFrame(() => { modal.scrollTop = modalScroll; });
 }
 
+function renderEditorTags() {
+  const row = document.getElementById('editor-tags-row');
+  row.innerHTML = currentEditorTags.map(t =>
+    `<span class="tag-pill removable" onclick="removeEditorTag('${esc(t)}')" title="Click to remove">${esc(t)}</span>`
+  ).join('');
+}
+
+function addTagFromInput() {
+  const input = document.getElementById('tag-input');
+  const raw = input.value.trim().toLowerCase();
+  if (!raw) return;
+  // support comma-separated multi-add
+  raw.split(',').map(t => t.trim()).filter(Boolean).forEach(t => {
+    if (!currentEditorTags.includes(t)) currentEditorTags.push(t);
+  });
+  input.value = '';
+  renderEditorTags();
+  input.focus();
+}
+
+function removeEditorTag(tag) {
+  currentEditorTags = currentEditorTags.filter(t => t !== tag);
+  renderEditorTags();
+}
+
 function saveCard() {
   if (!activeDeckId) { closeCardEditor(); return; }
   if (cardType === 'basic') {
@@ -778,9 +875,9 @@ function saveCard() {
     if (!front || !back) return;
     if (editingCardId) {
       const c = state.cards.find(x => x.id === editingCardId);
-      if (c) { c.front = front; c.back = back; c.type = 'basic'; }
+      if (c) { c.front = front; c.back = back; c.type = 'basic'; c.tags = [...currentEditorTags]; }
     } else {
-      state.cards.push({ id: 'c_' + Date.now(), deckId: activeDeckId, type: 'basic', front, back, interval: 1, due: Date.now(), ease: 2.5, reps: 0 });
+      state.cards.push({ id: 'c_' + Date.now(), deckId: activeDeckId, type: 'basic', front, back, interval: 1, due: Date.now(), ease: 2.5, reps: 0, tags: [...currentEditorTags] });
     }
   } else {
     const ct = document.getElementById('ec').value.trim();
@@ -789,9 +886,9 @@ function saveCard() {
     if (!ct || !ct.includes('{{c')) return;
     if (editingCardId) {
       const c = state.cards.find(x => x.id === editingCardId);
-      if (c) { c.clozeText = ct; c.type = 'cloze'; }
+      if (c) { c.clozeText = ct; c.type = 'cloze'; c.tags = [...currentEditorTags]; }
     } else {
-      state.cards.push({ id: 'c_' + Date.now(), deckId: activeDeckId, type: 'cloze', clozeText: ct, interval: 1, due: Date.now(), ease: 2.5, reps: 0 });
+      state.cards.push({ id: 'c_' + Date.now(), deckId: activeDeckId, type: 'cloze', clozeText: ct, interval: 1, due: Date.now(), ease: 2.5, reps: 0, tags: [...currentEditorTags] });
     }
   }
   save();
@@ -892,7 +989,9 @@ function editorKey(e, id) {
 
 // ─── REVIEW ───────────────────────────────────────────────────────────────────
 function startReview(all) {
-  const pool = state.cards.filter(c => c.deckId === activeDeckId && (all || c.due <= Date.now()));
+  let pool = state.cards.filter(c => c.deckId === activeDeckId);
+  if (activeTagFilter) pool = pool.filter(c => (c.tags || []).includes(activeTagFilter));
+  pool = pool.filter(c => all || c.due <= Date.now());
   revQueue = [...pool];
   for (let i = revQueue.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [revQueue[i],revQueue[j]]=[revQueue[j],revQueue[i]]; }
   revIdx = 0; revFlipped = false; revResults = { again:0, hard:0, good:0, easy:0 };
