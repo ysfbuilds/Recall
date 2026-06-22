@@ -247,6 +247,135 @@
   .rc-stats { display: flex; gap: 32px; margin-bottom: 32px; }
   .rc-stat-num { font-family: 'Space Mono', monospace; font-size: 30px; font-weight: 700; line-height: 1; }
   .rc-stat-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── FOCUS TIMER ── */
+  .focus-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: none; border: 1px solid var(--border);
+    color: var(--text-muted); font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; padding: 6px 14px; border-radius: 2px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .focus-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .focus-btn.active { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .focus-btn.break { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+  .focus-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); flex-shrink: 0; }
+  .focus-btn.active .focus-dot { background: var(--green); animation: pulse 1.5s infinite; }
+  .focus-btn.break .focus-dot { background: var(--blue); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* focus modal */
+  .focus-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 300; align-items: center; justify-content: center; }
+  .focus-overlay.open { display: flex; }
+  .focus-modal {
+    background: var(--bg-card); border: 1px solid var(--border-strong);
+    border-radius: 4px; padding: 32px; width: 480px; max-width: calc(100vw - 40px);
+  }
+  .focus-modal-title { font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; }
+  .focus-duration-row { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .dur-btn {
+    font-size: 12px; font-family: 'Space Mono', monospace; padding: 6px 14px;
+    border: 1px solid var(--border); background: none; color: var(--text-muted);
+    cursor: pointer; border-radius: 2px; transition: all 0.12s;
+  }
+  .dur-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .dur-btn.active { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .focus-custom-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .focus-custom-row input {
+    width: 80px; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    color: var(--text); font-family: 'Space Mono', monospace; font-size: 14px;
+    padding: 8px 10px; border-radius: 2px; outline: none; text-align: center;
+    transition: border-color 0.15s;
+  }
+  .focus-custom-row input:focus { border-color: var(--green); }
+  .focus-custom-row span { font-size: 13px; color: var(--text-muted); }
+  .focus-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-family: 'Space Mono', monospace; margin-bottom: 6px; }
+  .focus-topic-input {
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px;
+    padding: 10px 14px; border-radius: 2px; outline: none; margin-bottom: 16px;
+    transition: border-color 0.15s;
+  }
+  .focus-topic-input:focus { border-color: var(--green); }
+  .focus-deck-select {
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px;
+    padding: 10px 14px; border-radius: 2px; outline: none; margin-bottom: 20px;
+    cursor: pointer; transition: border-color 0.15s;
+  }
+  .focus-deck-select:focus { border-color: var(--green); }
+  .focus-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* active session panel */
+  .focus-session-panel {
+    position: fixed; bottom: 24px; right: 24px; z-index: 200;
+    background: var(--bg-card); border: 1px solid var(--border-strong);
+    border-radius: 4px; padding: 16px 20px; min-width: 280px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    display: none;
+    animation: slideUp 0.2s ease;
+  }
+  .focus-session-panel.show { display: block; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .fsp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .fsp-topic { font-size: 13px; font-weight: 600; color: var(--text); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fsp-mode { font-size: 10px; font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 10px; }
+  .fsp-mode.focus { background: var(--green-dim); color: var(--green); }
+  .fsp-mode.break { background: var(--blue-dim); color: var(--blue); }
+  .fsp-time { font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .fsp-time.urgent { color: var(--red); }
+  .fsp-progress { height: 3px; background: var(--border); border-radius: 1px; overflow: hidden; margin-bottom: 12px; }
+  .fsp-progress-fill { height: 100%; border-radius: 1px; transition: width 0.5s; }
+  .fsp-fill-focus { background: var(--green); }
+  .fsp-fill-break { background: var(--blue); }
+  .fsp-stats { font-size: 11px; color: var(--text-muted); font-family: 'Space Mono', monospace; margin-bottom: 12px; }
+  .fsp-actions { display: flex; gap: 6px; }
+  .fsp-defer-btn {
+    flex: 1; background: none; border: 1px solid var(--border); color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif; font-size: 12px; padding: 7px 10px;
+    cursor: pointer; border-radius: 2px; transition: all 0.12s;
+  }
+  .fsp-defer-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .fsp-end-btn {
+    flex: 1; background: none; border: 1px solid var(--border); color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif; font-size: 12px; padding: 7px 10px;
+    cursor: pointer; border-radius: 2px; transition: all 0.12s;
+  }
+  .fsp-end-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* summary modal */
+  .focus-summary {
+    background: var(--bg-card); border: 1px solid var(--border-strong);
+    border-radius: 4px; padding: 32px; width: 480px; max-width: calc(100vw - 40px);
+    max-height: 80vh; overflow-y: auto;
+  }
+  .fs-title { font-size: 36px; font-weight: 700; text-transform: uppercase; letter-spacing: -0.02em; color: var(--green); margin-bottom: 4px; }
+  .fs-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+  .fs-stats-row { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+  .fs-stat { }
+  .fs-stat-num { font-family: 'Space Mono', monospace; font-size: 26px; font-weight: 700; line-height: 1; }
+  .fs-stat-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 3px; }
+  .fs-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); font-family: 'Space Mono', monospace; margin-bottom: 8px; margin-top: 4px; }
+  .fs-defer-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+  .fs-defer-item { font-size: 13px; color: var(--text); padding: 8px 12px; border: 1px solid var(--border); border-radius: 2px; background: rgba(255,255,255,0.02); }
+  .fs-history { display: flex; flex-direction: column; gap: 6px; }
+  .fs-history-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .fs-history-item:last-child { border-bottom: none; }
+  .fs-hi-topic { font-size: 13px; font-weight: 500; flex: 1; }
+  .fs-hi-dur { font-size: 12px; color: var(--text-muted); font-family: 'Space Mono', monospace; }
+  .fs-hi-date { font-size: 11px; color: var(--text-faint); font-family: 'Space Mono', monospace; }
+
+  /* defer input overlay */
+  .defer-input-overlay {
+    position: fixed; bottom: 120px; right: 24px; z-index: 300;
+    background: var(--bg-card); border: 1px solid var(--border-strong);
+    border-radius: 4px; padding: 14px; width: 280px;
+    display: none;
+  }
+  .defer-input-overlay.show { display: block; }
+  .defer-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 9px 12px; border-radius: 2px; outline: none; margin-bottom: 8px; }
+  .defer-input:focus { border-color: var(--green); }
+  .defer-actions { display: flex; gap: 6px; justify-content: flex-end; }
 </style>
 </head>
 <body>
@@ -263,6 +392,10 @@
     Recall
   </div>
   <div class="nav-right">
+    <button class="focus-btn" id="focus-nav-btn" onclick="handleFocusNavClick()">
+      <span class="focus-dot"></span>
+      <span id="focus-nav-label">Focus</span>
+    </button>
     <div class="due-pill" id="due-pill">0 due</div>
     <button class="btn-add" onclick="openCardEditor()">+ Add card</button>
   </div>
@@ -1251,8 +1384,390 @@ function renderRevComplete(main) {
 
 function endReview() { document.onkeydown = null; renderDeckMain(); }
 
+// ─── FOCUS TIMER ──────────────────────────────────────────────────────────────
+if (!state.focusSessions) state.focusSessions = [];
+
+let focusDuration = 25; // minutes
+let breakDuration = 5;
+let focusTimer = null;
+let focusSecondsLeft = 0;
+let focusTotalSeconds = 0;
+let focusTopic = '';
+let focusLinkedDeckId = null;
+let focusMode = null; // 'focus' | 'break' | null
+let focusDeferred = [];
+let focusCardsAtStart = 0; // to calculate cards reviewed in session
+let focusStartTime = null;
+let pendingSessionData = null; // stored when summary shown
+
+function handleFocusNavClick() {
+  if (focusMode === 'focus' || focusMode === 'break') {
+    // toggle session panel visibility
+    const panel = document.getElementById('focus-session-panel');
+    panel.classList.toggle('show');
+  } else {
+    openFocusModal();
+  }
+}
+
+function openFocusModal() {
+  // populate deck select
+  const sel = document.getElementById('focus-deck-select');
+  sel.innerHTML = '<option value="">— No deck —</option>' +
+    state.decks.map(d => `<option value="${d.id}"${d.id === activeDeckId ? ' selected' : ''}>${esc(d.name)}</option>`).join('');
+  document.getElementById('focus-topic-input').value = '';
+  document.getElementById('custom-dur-input').value = '';
+  focusDuration = 25;
+  // reset duration buttons
+  document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.dur-btn:nth-child(2)').classList.add('active');
+  document.getElementById('focus-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('focus-topic-input').focus(), 50);
+}
+function closeFocusModal() { document.getElementById('focus-overlay').classList.remove('open'); }
+
+function setDuration(mins, btn) {
+  focusDuration = mins;
+  document.querySelectorAll('#focus-duration-row .dur-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('custom-dur-input').value = '';
+}
+function setCustomDuration(val) {
+  const n = parseInt(val);
+  if (n > 0 && n <= 180) {
+    focusDuration = n;
+    document.querySelectorAll('#focus-duration-row .dur-btn').forEach(b => b.classList.remove('active'));
+  }
+}
+
+function startFocusSession() {
+  const topic = document.getElementById('focus-topic-input').value.trim();
+  if (!topic) { document.getElementById('focus-topic-input').style.borderColor = 'var(--red)'; return; }
+  focusTopic = topic;
+  focusLinkedDeckId = document.getElementById('focus-deck-select').value || null;
+  focusDeferred = [];
+  focusStartTime = Date.now();
+  focusCardsAtStart = state.cards.filter(c => c.reps > 0).length; // proxy for "reviewed"
+  closeFocusModal();
+  launchTimer('focus', focusDuration);
+  // if deck linked, open it
+  if (focusLinkedDeckId && focusLinkedDeckId !== activeDeckId) {
+    selectDeck(focusLinkedDeckId);
+  }
+}
+
+function launchTimer(mode, minutes) {
+  focusMode = mode;
+  focusTotalSeconds = minutes * 60;
+  focusSecondsLeft = focusTotalSeconds;
+  if (focusTimer) clearInterval(focusTimer);
+  focusTimer = setInterval(timerTick, 1000);
+
+  // show panel
+  const panel = document.getElementById('focus-session-panel');
+  panel.classList.add('show');
+  updateSessionPanel();
+  updateNavBtn();
+}
+
+function timerTick() {
+  focusSecondsLeft--;
+  updateSessionPanel();
+  if (focusSecondsLeft <= 0) {
+    clearInterval(focusTimer);
+    if (focusMode === 'focus') {
+      timerComplete();
+    } else {
+      breakComplete();
+    }
+  }
+}
+
+function updateSessionPanel() {
+  const mins = Math.floor(focusSecondsLeft / 60);
+  const secs = focusSecondsLeft % 60;
+  const timeStr = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  const pct = (focusSecondsLeft / focusTotalSeconds) * 100;
+
+  const timeEl = document.getElementById('fsp-time');
+  timeEl.textContent = timeStr;
+  timeEl.classList.toggle('urgent', focusMode === 'focus' && focusSecondsLeft <= 60);
+
+  document.getElementById('fsp-topic').textContent = focusTopic;
+  document.getElementById('fsp-mode').textContent = focusMode === 'focus' ? 'Focus' : 'Break';
+  document.getElementById('fsp-mode').className = `fsp-mode ${focusMode}`;
+  document.getElementById('fsp-progress-fill').style.width = pct + '%';
+  document.getElementById('fsp-progress-fill').className = `fsp-progress-fill fsp-fill-${focusMode}`;
+
+  // session stats
+  const elapsed = focusMode === 'focus' ? Math.round((focusDuration * 60 - focusSecondsLeft) / 60) : 0;
+  const cardsReviewed = revIdx > 0 ? revIdx : 0;
+  document.getElementById('fsp-stats').textContent =
+    `${elapsed} min elapsed · ${cardsReviewed} cards reviewed · ${focusDeferred.length} deferred`;
+
+  // update nav label
+  updateNavBtn();
+  document.title = `${timeStr} — ${focusTopic} · Recall`;
+}
+
+function updateNavBtn() {
+  const btn = document.getElementById('focus-nav-btn');
+  const label = document.getElementById('focus-nav-label');
+  if (focusMode === 'focus') {
+    const mins = Math.floor(focusSecondsLeft / 60);
+    const secs = focusSecondsLeft % 60;
+    label.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    btn.className = 'focus-btn active';
+  } else if (focusMode === 'break') {
+    const mins = Math.floor(focusSecondsLeft / 60);
+    const secs = focusSecondsLeft % 60;
+    label.textContent = `Break ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    btn.className = 'focus-btn break';
+  } else {
+    label.textContent = 'Focus';
+    btn.className = 'focus-btn';
+  }
+}
+
+function timerComplete() {
+  document.title = 'Recall';
+  const durationMins = focusDuration;
+  const cardsReviewed = revIdx > 0 ? revIdx : 0;
+  pendingSessionData = {
+    topic: focusTopic,
+    duration: durationMins,
+    cardsReviewed,
+    deferred: [...focusDeferred],
+    linkedDeckId: focusLinkedDeckId,
+    completedAt: new Date().toISOString()
+  };
+  // save to history
+  state.focusSessions.push(pendingSessionData);
+  save();
+  // hide panel
+  document.getElementById('focus-session-panel').classList.remove('show');
+  showSummary(pendingSessionData);
+}
+
+function endFocusSession() {
+  if (focusTimer) clearInterval(focusTimer);
+  const elapsed = Math.round((focusDuration * 60 - focusSecondsLeft) / 60);
+  const cardsReviewed = revIdx > 0 ? revIdx : 0;
+  pendingSessionData = {
+    topic: focusTopic,
+    duration: elapsed,
+    cardsReviewed,
+    deferred: [...focusDeferred],
+    linkedDeckId: focusLinkedDeckId,
+    completedAt: new Date().toISOString(),
+    endedEarly: true
+  };
+  state.focusSessions.push(pendingSessionData);
+  save();
+  document.getElementById('focus-session-panel').classList.remove('show');
+  focusMode = null;
+  updateNavBtn();
+  document.title = 'Recall';
+  showSummary(pendingSessionData);
+}
+
+// ─── DEFER ────────────────────────────────────────────────────────────────────
+function openDeferInput() {
+  document.getElementById('defer-overlay').classList.add('show');
+  setTimeout(() => document.getElementById('defer-input').focus(), 50);
+}
+function closeDeferInput() {
+  document.getElementById('defer-overlay').classList.remove('show');
+  document.getElementById('defer-input').value = '';
+}
+function saveDefer() {
+  const text = document.getElementById('defer-input').value.trim();
+  if (!text) return;
+  focusDeferred.push(text);
+  closeDeferInput();
+  updateSessionPanel();
+}
+
+// ─── BREAK ────────────────────────────────────────────────────────────────────
+function setBreakDur(mins, btn) {
+  breakDuration = mins;
+  document.querySelectorAll('#break-btn-row .dur-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function startBreak() {
+  closeSummary();
+  launchTimer('break', breakDuration);
+}
+
+function breakComplete() {
+  focusMode = null;
+  document.getElementById('focus-session-panel').classList.remove('show');
+  updateNavBtn();
+  document.title = 'Recall';
+  // gentle prompt to start next session
+  document.getElementById('focus-nav-label').textContent = 'Focus ✓';
+  setTimeout(() => { if (!focusMode) updateNavBtn(); }, 3000);
+}
+
+// ─── SUMMARY ──────────────────────────────────────────────────────────────────
+function showSummary(data) {
+  focusMode = null;
+  document.getElementById('fs-title').textContent = data.endedEarly ? 'Stopped' : 'Done';
+  document.getElementById('fs-sub').textContent =
+    `"${data.topic}" · ${data.duration} min${data.endedEarly ? ' (ended early)' : ''}`;
+
+  // stats row
+  const statsRow = document.getElementById('fs-stats-row');
+  statsRow.innerHTML = `
+    <div class="fs-stat"><div class="fs-stat-num" style="color:var(--green)">${data.duration}</div><div class="fs-stat-lbl">Minutes</div></div>
+    <div class="fs-stat"><div class="fs-stat-num" style="color:var(--blue)">${data.cardsReviewed}</div><div class="fs-stat-lbl">Cards reviewed</div></div>
+    <div class="fs-stat"><div class="fs-stat-num" style="color:var(--coral)">${data.deferred.length}</div><div class="fs-stat-lbl">Deferred</div></div>
+  `;
+
+  // deferred thoughts
+  const deferSection = document.getElementById('fs-deferred-section');
+  if (data.deferred.length > 0) {
+    deferSection.innerHTML = `
+      <div class="fs-section-label">Deferred thoughts</div>
+      <div class="fs-defer-list">
+        ${data.deferred.map(d => `<div class="fs-defer-item">— ${esc(d)}</div>`).join('')}
+      </div>`;
+  } else {
+    deferSection.innerHTML = '';
+  }
+
+  // linked deck review button
+  const reviewBtn = document.getElementById('fs-review-btn');
+  if (data.linkedDeckId) {
+    const deck = state.decks.find(d => d.id === data.linkedDeckId);
+    const due = state.cards.filter(c => c.deckId === data.linkedDeckId && c.due <= Date.now()).length;
+    if (deck && due > 0) {
+      reviewBtn.style.display = 'block';
+      reviewBtn.textContent = `Review ${due} due in "${deck.name}" →`;
+    } else {
+      reviewBtn.style.display = 'none';
+    }
+  } else {
+    reviewBtn.style.display = 'none';
+  }
+
+  // session history (last 5)
+  const histSection = document.getElementById('fs-history-section');
+  const recent = [...state.focusSessions].reverse().slice(0, 5);
+  if (recent.length > 1) {
+    histSection.innerHTML = `
+      <div class="fs-section-label">Recent sessions</div>
+      <div class="fs-history">
+        ${recent.map(s => `<div class="fs-history-item">
+          <div class="fs-hi-topic">${esc(s.topic)}</div>
+          <div class="fs-hi-dur">${s.duration}m</div>
+          <div class="fs-hi-date">${new Date(s.completedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+        </div>`).join('')}
+      </div>`;
+  } else {
+    histSection.innerHTML = '';
+  }
+
+  document.getElementById('focus-summary-overlay').classList.add('open');
+  updateNavBtn();
+}
+
+function closeSummary() {
+  document.getElementById('focus-summary-overlay').classList.remove('open');
+  pendingSessionData = null;
+}
+
+function startDeckReviewFromSession() {
+  if (pendingSessionData?.linkedDeckId) {
+    closeSummary();
+    selectDeck(pendingSessionData.linkedDeckId);
+    startReview(false);
+  }
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 renderSidebar();
 </script>
+<!-- FOCUS SETUP MODAL -->
+<div class="focus-overlay" id="focus-overlay" onclick="if(event.target===this)closeFocusModal()">
+  <div class="focus-modal">
+    <div class="focus-modal-title">Start a focus session</div>
+
+    <div class="focus-label">Duration</div>
+    <div class="focus-duration-row" id="focus-duration-row">
+      <button class="dur-btn" onclick="setDuration(15,this)">15 min</button>
+      <button class="dur-btn active" onclick="setDuration(25,this)">25 min</button>
+      <button class="dur-btn" onclick="setDuration(45,this)">45 min</button>
+      <button class="dur-btn" onclick="setDuration(60,this)">60 min</button>
+    </div>
+    <div class="focus-custom-row">
+      <input type="number" id="custom-dur-input" min="1" max="180" placeholder="–" oninput="setCustomDuration(this.value)" />
+      <span>min custom</span>
+    </div>
+
+    <div class="focus-label">What are you working on?</div>
+    <input class="focus-topic-input" id="focus-topic-input" type="text" placeholder="e.g. Reading Quran, HTTP cards, SWE study..." />
+
+    <div class="focus-label">Link a deck (optional)</div>
+    <select class="focus-deck-select" id="focus-deck-select">
+      <option value="">— No deck —</option>
+    </select>
+
+    <div class="focus-modal-actions">
+      <button class="btn-cancel" onclick="closeFocusModal()">Cancel</button>
+      <button class="btn-save" onclick="startFocusSession()">Start session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVE SESSION PANEL (floating bottom-right) -->
+<div class="focus-session-panel" id="focus-session-panel">
+  <div class="fsp-header">
+    <div class="fsp-topic" id="fsp-topic">—</div>
+    <span class="fsp-mode focus" id="fsp-mode">Focus</span>
+  </div>
+  <div class="fsp-time" id="fsp-time">25:00</div>
+  <div class="fsp-progress"><div class="fsp-progress-fill fsp-fill-focus" id="fsp-progress-fill" style="width:100%"></div></div>
+  <div class="fsp-stats" id="fsp-stats">0 cards reviewed this session</div>
+  <div class="fsp-actions">
+    <button class="fsp-defer-btn" onclick="openDeferInput()">+ Defer thought</button>
+    <button class="fsp-end-btn" onclick="endFocusSession()">End session</button>
+  </div>
+</div>
+
+<!-- DEFER THOUGHT INPUT -->
+<div class="defer-input-overlay" id="defer-overlay">
+  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);font-family:'Space Mono',monospace;margin-bottom:6px;">Defer a thought</div>
+  <input class="defer-input" id="defer-input" type="text" placeholder="What's on your mind?" onkeydown="if(event.key==='Enter')saveDefer(); if(event.key==='Escape')closeDeferInput();" />
+  <div class="defer-actions">
+    <button class="btn-cancel" style="padding:6px 14px;font-size:12px;" onclick="closeDeferInput()">Cancel</button>
+    <button class="btn-save" style="padding:6px 14px;font-size:12px;" onclick="saveDefer()">Save</button>
+  </div>
+</div>
+
+<!-- SESSION SUMMARY MODAL -->
+<div class="focus-overlay" id="focus-summary-overlay">
+  <div class="focus-summary">
+    <div class="fs-title" id="fs-title">Done</div>
+    <div class="fs-sub" id="fs-sub">Session complete</div>
+    <div class="fs-stats-row" id="fs-stats-row"></div>
+    <div id="fs-deferred-section"></div>
+    <div style="margin-bottom:20px;">
+      <div class="fs-section-label">Break</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;" id="break-btn-row">
+        <button class="dur-btn active" id="break-5" onclick="setBreakDur(5,this)">5 min</button>
+        <button class="dur-btn" id="break-10" onclick="setBreakDur(10,this)">10 min</button>
+        <button class="dur-btn" id="break-15" onclick="setBreakDur(15,this)">15 min</button>
+      </div>
+      <button class="btn-save" style="width:100%;" onclick="startBreak()">Take a break</button>
+    </div>
+    <button class="btn-secondary" style="width:100%;margin-bottom:8px;" id="fs-review-btn" onclick="startDeckReviewFromSession()" style="display:none;">Review linked deck →</button>
+    <button class="btn-cancel" style="width:100%;" onclick="closeSummary()">Close</button>
+
+    <div id="fs-history-section" style="margin-top:24px;"></div>
+  </div>
+</div>
+
 </body>
 </html>
