@@ -582,10 +582,11 @@ function importData(e) {
 }
 
 let state = loadState();
-if (!state.folders) state.folders = []; // migrate old saves
+if (!state.folders) state.folders = [];
+if (!state.focusSessions) state.focusSessions = [];
 
-// seed demo data
-if (state.decks.length === 0) {
+// seed demo data only on genuine first install — not when user has deleted all decks
+if (!localStorage.getItem(SK)) {
   const fid = 'folder_demo';
   const did = 'deck_demo';
   state.folders.push({ id: fid, name: 'Computer Science', collapsed: false });
@@ -1791,7 +1792,6 @@ function renderRevComplete(main) {
 function endReview() { document.onkeydown = null; renderDeckMain(); }
 
 // ─── FOCUS TIMER ──────────────────────────────────────────────────────────────
-if (!state.focusSessions) state.focusSessions = [];
 
 let focusDuration = 25; // minutes
 let breakDuration = 5;
