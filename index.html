@@ -407,6 +407,9 @@
       <span id="focus-nav-label">Focus</span>
     </button>
     <button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="openFocusStats()">Sessions</button>
+    <button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="exportData()">Export</button>
+    <button class="btn-secondary" style="font-size:12px;padding:6px 14px;" onclick="document.getElementById('import-input').click()">Import</button>
+    <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importData(event)" />
     <div class="due-pill" id="due-pill">0 due</div>
     <button class="btn-add" onclick="openCardEditor()">+ Add card</button>
   </div>
@@ -533,7 +536,50 @@
 const SK = 'recall_v2';
 function loadState() { try { const s = localStorage.getItem(SK); return s ? JSON.parse(s) : fresh(); } catch { return fresh(); } }
 function fresh() { return { folders: [], decks: [], cards: [] }; }
-function save() { localStorage.setItem(SK, JSON.stringify(state)); }
+function save() {
+  localStorage.setItem(SK, JSON.stringify(state));
+}
+
+function exportData() {
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `recall-backup-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (!imported.decks || !imported.cards) {
+        alert('Invalid backup file — missing decks or cards.');
+        return;
+      }
+      // merge: keep existing data, add imported on top
+      const existingDeckIds = new Set(state.decks.map(d => d.id));
+      const existingCardIds = new Set(state.cards.map(c => c.id));
+      const existingFolderIds = new Set(state.folders.map(f => f.id));
+      (imported.folders || []).forEach(f => { if (!existingFolderIds.has(f.id)) state.folders.push(f); });
+      (imported.decks || []).forEach(d => { if (!existingDeckIds.has(d.id)) state.decks.push(d); });
+      (imported.cards || []).forEach(c => { if (!existingCardIds.has(c.id)) state.cards.push(c); });
+      save();
+      renderSidebar();
+      alert(`Import complete. Added ${(imported.decks||[]).filter(d=>!existingDeckIds.has(d.id)).length} decks and ${(imported.cards||[]).filter(c=>!existingCardIds.has(c.id)).length} cards.`);
+    } catch {
+      alert('Could not read file — make sure it\'s a valid Recall backup.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
 
 let state = loadState();
 if (!state.folders) state.folders = []; // migrate old saves
