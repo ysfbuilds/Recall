@@ -84,6 +84,44 @@
   .tag-filter-row .tag-pill.all { background: var(--bg-hover); color: var(--text-muted); }
   .tag-filter-row .tag-pill.all.active { background: var(--text); color: var(--bg); }
   .card-tags-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+
+  /* card links */
+  .card-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(27,188,254,0.1); color: var(--blue);
+    border: 1px solid rgba(27,188,254,0.3); border-radius: 3px;
+    padding: 1px 7px; font-size: 12px; cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif; transition: all 0.12s;
+    vertical-align: middle; text-decoration: none;
+  }
+  .card-link:hover { background: rgba(27,188,254,0.2); border-color: var(--blue); }
+  .card-link::before { content: '↗'; font-size: 10px; opacity: 0.7; }
+  /* external links */
+  .ext-link { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  .ext-link:hover { opacity: 0.8; }
+
+  /* link search dropdown */
+  .link-search-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 400; align-items: flex-start; justify-content: center; padding-top: 120px; }
+  .link-search-overlay.open { display: flex; }
+  .link-search-box { background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 4px; width: 520px; max-width: calc(100vw - 40px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); overflow: hidden; }
+  .link-search-input { width: 100%; background: none; border: none; border-bottom: 1px solid var(--border); color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 15px; padding: 14px 18px; outline: none; }
+  .link-search-results { max-height: 320px; overflow-y: auto; }
+  .link-result-item { padding: 10px 18px; cursor: pointer; transition: background 0.1s; border-bottom: 1px solid var(--border); }
+  .link-result-item:hover, .link-result-item.selected { background: var(--bg-hover); }
+  .link-result-item:last-child { border-bottom: none; }
+  .lri-front { font-size: 13px; color: var(--text); font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lri-meta { font-size: 11px; color: var(--text-faint); font-family: 'Space Mono', monospace; }
+  .link-search-empty { padding: 24px 18px; font-size: 13px; color: var(--text-faint); text-align: center; }
+
+  /* linked card viewer */
+  .linked-card-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center; }
+  .linked-card-overlay.open { display: flex; }
+  .linked-card-modal { background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 4px; width: 560px; max-width: calc(100vw - 40px); max-height: 80vh; overflow-y: auto; padding: 28px; }
+  .lcm-deck { font-size: 11px; color: var(--text-faint); font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .lcm-front { font-size: 18px; font-weight: 600; color: var(--text); line-height: 1.5; margin-bottom: 16px; }
+  .lcm-divider { height: 1px; background: var(--border); margin-bottom: 16px; }
+  .lcm-back { font-size: 15px; color: var(--text); line-height: 1.75; }
+  .lcm-actions { display: flex; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
   .editor-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
   .tag-input-row { display: flex; gap: 6px; margin-bottom: 16px; position: relative; }
   .tag-input-row input { flex: 1; }
@@ -452,6 +490,8 @@
         <button class="rich-btn" onclick="wrapSel('ef','`','`')" title="Cmd+E">code</button>
         <button class="rich-btn" onclick="insertBulletBtn('ef')">• list</button>
         <button class="rich-btn" onclick="insertCodeBlockBtn('ef')">{ } block</button>
+        <button class="rich-btn" onclick="insertExtLink('ef')" title="Insert external link">🔗 url</button>
+        <button class="rich-btn" onclick="openLinkSearch('ef')" title="Link to another card">[[ link</button>
       </div>
       <textarea class="editor-ta" id="ef" placeholder="Question or prompt..." onkeydown="taKey(event,'ef')"></textarea>
 
@@ -462,6 +502,8 @@
         <button class="rich-btn" onclick="wrapSel('eb','`','`')" title="Cmd+E">code</button>
         <button class="rich-btn" onclick="insertBulletBtn('eb')">• list</button>
         <button class="rich-btn" onclick="insertCodeBlockBtn('eb')">{ } block</button>
+        <button class="rich-btn" onclick="insertExtLink('eb')" title="Insert external link">🔗 url</button>
+        <button class="rich-btn" onclick="openLinkSearch('eb')" title="Link to another card">[[ link</button>
       </div>
       <textarea class="editor-ta" id="eb" placeholder="Answer..." onkeydown="taKey(event,'eb')"></textarea>
     </div>
@@ -476,6 +518,7 @@
         <button class="rich-btn" onclick="wrapSel('ec','`','`')" title="Cmd+E">code</button>
         <button class="rich-btn" onclick="insertBulletBtn('ec')">• list</button>
         <button class="rich-btn" onclick="insertCodeBlockBtn('ec')">{ } block</button>
+        <button class="rich-btn" onclick="insertExtLink('ec')" title="Insert external link">🔗 url</button>
         <button class="rich-btn" onclick="insertClozeTag()">+ cloze</button>
         <button class="rich-btn" onclick="insertWordCloze()" title="Cloze each word individually">+ word cloze</button>
       </div>
@@ -641,6 +684,14 @@ function applyInline(html) {
   html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   html = html.replace(/_(.+?)_/g, '<em>$1</em>');
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // external links [label](url)
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (_, label, url) => {
+    return `<a class="ext-link" href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+  });
+  // bare URLs
+  html = html.replace(/(^|[\s>])(https?:\/\/[^\s<]+)/g, (_, pre, url) => {
+    return `${pre}<a class="ext-link" href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
   return html;
 }
 
@@ -705,6 +756,7 @@ function renderCodeBlock(raw, lang) {
 
 function md(text) {
   if (!text) return '';
+  // extract code blocks first
   const blocks = [];
   const stripped = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
     blocks.push(renderCodeBlock(code, lang.toLowerCase().trim()));
@@ -714,6 +766,10 @@ function md(text) {
   h = applyInline(h);
   h = applyStructure(h);
   h = h.replace(/\x01BLOCK(\d+)\x01/g, (_, i) => blocks[+i]);
+  // render card links [[id|title]] — after esc so we need to handle escaped version
+  h = h.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (_, cardId, title) => {
+    return `<span class="card-link" onclick="event.stopPropagation();openLinkedCard('${cardId}')">${title}</span>`;
+  });
   return h;
 }
 
@@ -778,6 +834,9 @@ function mdClozeBlanked(text) {
   h = h.replace(/\{\{c\d+::(.+?)\}\}/g, '<span class="cloze-blank-prev">[...]</span>');
   h = applyStructure(h);
   h = h.replace(/\x01BLOCK(\d+)\x01/g, (_, i) => blocks[+i]);
+  h = h.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (_, cardId, title) => {
+    return `<span class="card-link" onclick="event.stopPropagation();openLinkedCard('${cardId}')">${title}</span>`;
+  });
   return h;
 }
 function getClozeAnswers(text) {
@@ -1337,6 +1396,20 @@ function insertCodeBlockBtn(id) {
   el.focus();
 }
 
+function insertExtLink(id) {
+  const el = document.getElementById(id);
+  const s = el.selectionStart, e = el.selectionEnd;
+  const sel = el.value.slice(s, e).trim();
+  const label = sel || 'link text';
+  const insert = `[${label}](https://)`;
+  el.value = el.value.slice(0, s) + insert + el.value.slice(e);
+  // position cursor inside the URL part
+  const urlStart = s + label.length + 3; // after [label](
+  el.selectionStart = urlStart;
+  el.selectionEnd = urlStart + 8; // select "https://"
+  el.focus();
+}
+
 function insertClozeTag() {
   const el = document.getElementById('ec');
   const scrollTop = el.scrollTop;
@@ -1388,8 +1461,20 @@ function taKey(e, id) {
   if (mod && e.key === 'b') { e.preventDefault(); wrapSel(id, '**', '**'); return; }
   if (mod && e.key === 'i') { e.preventDefault(); wrapSel(id, '_', '_'); return; }
   if (mod && e.key === 'e') { e.preventDefault(); wrapSel(id, '`', '`'); return; }
-  // Cmd+Shift+C = cloze wrap (only in cloze editor)
   if (mod && e.shiftKey && e.key === 'C' && id === 'ec') { e.preventDefault(); insertClozeTag(); return; }
+  // [[ auto-triggers link search
+  if (e.key === '[') {
+    const s = el.selectionStart;
+    const before = el.value.slice(0, s);
+    if (before.endsWith('[')) {
+      e.preventDefault();
+      // remove the first [ and open search
+      el.value = el.value.slice(0, s - 1) + el.value.slice(s);
+      el.selectionStart = el.selectionEnd = s - 1;
+      openLinkSearch(id);
+      return;
+    }
+  }
 
   // Auto-bullet: "- " or "* " at start of a line → stay as "- " (it's already the markdown syntax!)
   // What we DO want: Tab on a bullet line = indent it as sub-bullet
@@ -2106,6 +2191,136 @@ function openFocusStats() {
 
 function closeFocusStats() { document.getElementById('focus-stats-overlay').classList.remove('open'); }
 
+// ─── CARD LINKS ───────────────────────────────────────────────────────────────
+let linkTargetFieldId = null;
+let linkSearchSelected = -1;
+let viewingLinkedCardId = null;
+
+function openLinkSearch(fieldId) {
+  linkTargetFieldId = fieldId;
+  linkSearchSelected = -1;
+  document.getElementById('link-search-input').value = '';
+  document.getElementById('link-search-results').innerHTML = '<div class="link-search-empty">Start typing to search cards…</div>';
+  document.getElementById('link-search-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('link-search-input').focus(), 50);
+}
+
+function closeLinkSearch() {
+  document.getElementById('link-search-overlay').classList.remove('open');
+  linkTargetFieldId = null;
+}
+
+function renderLinkResults() {
+  const q = document.getElementById('link-search-input').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('link-search-results');
+  linkSearchSelected = -1;
+
+  if (!q) {
+    resultsEl.innerHTML = '<div class="link-search-empty">Start typing to search cards…</div>';
+    return;
+  }
+
+  // search all cards, skip the card currently being edited
+  const results = state.cards.filter(c => {
+    if (c.id === editingCardId) return false;
+    const front = c.type === 'cloze'
+      ? (c.clozeText || '').replace(/\{\{c\d+::(.*?)\}\}/g, '$1')
+      : (c.front || '');
+    return front.toLowerCase().includes(q);
+  }).slice(0, 12);
+
+  if (results.length === 0) {
+    resultsEl.innerHTML = '<div class="link-search-empty">No cards found</div>';
+    return;
+  }
+
+  resultsEl.innerHTML = results.map((c, i) => {
+    const deck = state.decks.find(d => d.id === c.deckId);
+    const folder = deck?.folderId ? state.folders.find(f => f.id === deck.folderId) : null;
+    const front = c.type === 'cloze'
+      ? (c.clozeText || '').replace(/\{\{c\d+::(.*?)\}\}/g, '$1').slice(0, 80)
+      : (c.front || '').slice(0, 80);
+    const path = [folder?.name, deck?.name].filter(Boolean).join(' › ');
+    // highlight match
+    const idx = front.toLowerCase().indexOf(q);
+    const highlighted = idx >= 0
+      ? esc(front.slice(0, idx)) + `<mark style="background:none;color:var(--purple);font-weight:700;">${esc(front.slice(idx, idx + q.length))}</mark>` + esc(front.slice(idx + q.length))
+      : esc(front);
+    return `<div class="link-result-item" data-id="${c.id}" onclick="insertLink('${c.id}')">
+      <div class="lri-front">${highlighted}</div>
+      <div class="lri-meta">${esc(path)}</div>
+    </div>`;
+  }).join('');
+}
+
+function linkSearchKey(e) {
+  const items = document.querySelectorAll('.link-result-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); linkSearchSelected = Math.min(linkSearchSelected + 1, items.length - 1); items.forEach((el, i) => el.classList.toggle('selected', i === linkSearchSelected)); return; }
+  if (e.key === 'ArrowUp') { e.preventDefault(); linkSearchSelected = Math.max(linkSearchSelected - 1, -1); items.forEach((el, i) => el.classList.toggle('selected', i === linkSearchSelected)); return; }
+  if (e.key === 'Enter') { e.preventDefault(); if (linkSearchSelected >= 0 && items[linkSearchSelected]) insertLink(items[linkSearchSelected].dataset.id); return; }
+  if (e.key === 'Escape') { closeLinkSearch(); return; }
+}
+
+function insertLink(cardId) {
+  const card = state.cards.find(c => c.id === cardId);
+  if (!card || !linkTargetFieldId) { closeLinkSearch(); return; }
+  const front = card.type === 'cloze'
+    ? (card.clozeText || '').replace(/\{\{c\d+::(.*?)\}\}/g, '$1').slice(0, 40).trim()
+    : (card.front || '').slice(0, 40).trim();
+  const linkText = `[[${cardId}|${front}]]`;
+  const el = document.getElementById(linkTargetFieldId);
+  const s = el.selectionStart;
+  el.value = el.value.slice(0, s) + linkText + el.value.slice(el.selectionEnd);
+  el.selectionStart = el.selectionEnd = s + linkText.length;
+  el.focus();
+  closeLinkSearch();
+}
+
+// render [[id|title]] links as clickable chips in md()
+function renderLinks(html) {
+  return html.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (_, cardId, title) => {
+    return `<span class="card-link" onclick="event.stopPropagation();openLinkedCard('${cardId}')">${esc(title)}</span>`;
+  });
+}
+
+// ─── LINKED CARD VIEWER ───────────────────────────────────────────────────────
+function openLinkedCard(cardId) {
+  const card = state.cards.find(c => c.id === cardId);
+  if (!card) return;
+  const deck = state.decks.find(d => d.id === card.deckId);
+  const folder = deck?.folderId ? state.folders.find(f => f.id === deck.folderId) : null;
+  const path = [folder?.name, deck?.name].filter(Boolean).join(' › ');
+
+  viewingLinkedCardId = cardId;
+  document.getElementById('lcm-deck').textContent = path;
+
+  if (card.type === 'cloze') {
+    const revealed = (card.clozeText || '').replace(/\{\{c\d+::(.*?)\}\}/g, '<b style="color:var(--accent)">$1</b>');
+    document.getElementById('lcm-front').innerHTML = md(revealed.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>'));
+    document.getElementById('lcm-divider').style.display = 'none';
+    document.getElementById('lcm-back').innerHTML = '';
+  } else {
+    document.getElementById('lcm-front').innerHTML = md(card.front || '');
+    document.getElementById('lcm-divider').style.display = 'block';
+    document.getElementById('lcm-back').innerHTML = md(card.back || '');
+  }
+
+  document.getElementById('linked-card-overlay').classList.add('open');
+}
+
+function closeLinkedCard() {
+  document.getElementById('linked-card-overlay').classList.remove('open');
+  viewingLinkedCardId = null;
+}
+
+function openLinkedCardEdit() {
+  const cardId = viewingLinkedCardId; // save before closeLinkedCard nulls it
+  closeLinkedCard();
+  if (!cardId) return;
+  if (revQueue.length > 0 && revIdx < revQueue.length) resumeReviewAfterEdit = true;
+  openCardEditor(cardId);
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 renderSidebar();
 setupCEKeydown();
@@ -2200,6 +2415,32 @@ setupCEKeydown();
     <div id="fstats-totals" style="display:flex;gap:28px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;"></div>
     <div class="fs-section-label">Session history</div>
     <div id="fstats-list" style="display:flex;flex-direction:column;gap:1px;"></div>
+  </div>
+</div>
+
+<!-- LINK SEARCH MODAL -->
+<div class="link-search-overlay" id="link-search-overlay" onclick="if(event.target===this)closeLinkSearch()">
+  <div class="link-search-box">
+    <input class="link-search-input" id="link-search-input" type="text" placeholder="Search cards to link..." autocomplete="off"
+      oninput="renderLinkResults()"
+      onkeydown="linkSearchKey(event)" />
+    <div class="link-search-results" id="link-search-results">
+      <div class="link-search-empty">Start typing to search cards…</div>
+    </div>
+  </div>
+</div>
+
+<!-- LINKED CARD VIEWER -->
+<div class="linked-card-overlay" id="linked-card-overlay" onclick="if(event.target===this)closeLinkedCard()">
+  <div class="linked-card-modal">
+    <div class="lcm-deck" id="lcm-deck"></div>
+    <div class="lcm-front" id="lcm-front"></div>
+    <div class="lcm-divider" id="lcm-divider"></div>
+    <div class="lcm-back" id="lcm-back"></div>
+    <div class="lcm-actions">
+      <button class="btn-secondary" onclick="closeLinkedCard()">Close</button>
+      <button class="btn-secondary" id="lcm-edit-btn" onclick="openLinkedCardEdit()">Edit card</button>
+    </div>
   </div>
 </div>
 
